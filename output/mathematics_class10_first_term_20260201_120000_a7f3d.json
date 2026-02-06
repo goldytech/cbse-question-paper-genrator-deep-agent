@@ -1,0 +1,298 @@
+{
+  "schema_version": "1.0",
+  "exam_metadata": {
+    "board": "CBSE",
+    "class": 10,
+    "subject": "Mathematics",
+    "exam_type": "First Term",
+    "total_marks": 50,
+    "duration_minutes": 120,
+    "academic_year": "2025-26"
+  },
+  "sections": [
+    {
+      "section_id": "A",
+      "title": "Multiple Choice Questions",
+      "question_format": "MCQ",
+      "marks_per_question": 1,
+      "questions_provided": 10,
+      "questions_attempt": 10,
+      "questions": [
+        {
+          "question_id": "MATH-10-REA-MCQ-001",
+          "question_text": "Two positive integers are in the ratio 6 : 13. If their HCF is 5, what are the two integers?",
+          "chapter": "Real Numbers",
+          "topic": "LCM HCF",
+          "question_format": "MCQ",
+          "marks": 1,
+          "options": ["A) 30 and 65", "B) 6 and 13", "C) 12 and 26", "D) 36 and 78"],
+          "correct_answer": "A",
+          "difficulty": "easy",
+          "bloom_level": "apply",
+          "tags": ["hcf lcm", "real numbers"],
+          "explanation": "Numbers = ratio parts × HCF → 6×5 = 30 and 13×5 = 65."
+        },
+        {
+          "question_id": "MATH-10-REA-MCQ-002",
+          "question_text": "Using Euclid's division algorithm, find the HCF of 91 and 65.",
+          "chapter": "Real Numbers",
+          "topic": "Euclid's Division Algorithm",
+          "question_format": "MCQ",
+          "marks": 1,
+          "options": ["A) 13", "B) 26", "C) 7", "D) 5"],
+          "correct_answer": "A",
+          "difficulty": "easy",
+          "bloom_level": "apply",
+          "tags": ["euclid's algorithm", "hcf"]
+        },
+        {
+          "question_id": "MATH-10-POL-MCQ-003",
+          "question_text": "If one zero of the quadratic polynomial x^2 - 5x + k is 4, then the value of k is:",
+          "chapter": "Polynomials",
+          "topic": "Zeroes of Polynomial",
+          "question_format": "MCQ",
+          "marks": 1,
+          "options": ["A) 0", "B) 2", "C) 4", "D) -4"],
+          "correct_answer": "C",
+          "difficulty": "easy",
+          "bloom_level": "understand",
+          "tags": ["zeroes", "polynomials"]
+        },
+        {
+          "question_id": "MATH-10-LIN-MCQ-004",
+          "question_text": "Which of the following pairs of linear equations represent coincident lines?",
+          "chapter": "Pair of Linear Equations in Two Variables",
+          "topic": "Graphical Method",
+          "question_format": "MCQ",
+          "marks": 1,
+          "options": ["A) 2x + 3y = 5 and 4x + 6y = 10", "B) 2x + 3y = 5 and 4x + 6y = 9", "C) 2x + 3y = 5 and 3x + 2y = 5", "D) 2x + 3y = 5 and 2x + 3y = 8"],
+          "correct_answer": "A",
+          "difficulty": "easy",
+          "bloom_level": "understand",
+          "tags": ["pair of linear equations", "graphs"]
+        },
+        {
+          "question_id": "MATH-10-REA-MCQ-005",
+          "question_text": "According to the Fundamental Theorem of Arithmetic, which of the following is the correct prime factorization of 462?",
+          "chapter": "Real Numbers",
+          "topic": "Fundamental Theorem of Arithmetic",
+          "question_format": "MCQ",
+          "marks": 1,
+          "options": ["A) 2 × 3 × 7 × 11", "B) 2 × 3^2 × 7", "C) 2 × 231", "D) 6 × 77"],
+          "correct_answer": "A",
+          "difficulty": "easy",
+          "bloom_level": "remember",
+          "tags": ["prime factorisation", "fundamental theorem"]
+        },
+        {
+          "question_id": "MATH-10-POL-MCQ-006",
+          "question_text": "The sum and product of the zeroes of a quadratic polynomial are 7 and 12/5 respectively. If the polynomial has leading coefficient 5, then which of the following is the polynomial?",
+          "chapter": "Polynomials",
+          "topic": "Relationship between Zeroes Coefficients",
+          "question_format": "MCQ",
+          "marks": 1,
+          "options": ["A) 5x^2 - 35x + 12", "B) x^2 - 7x + 12/5", "C) 5x^2 + 35x + 12", "D) 5x^2 - 7x + 12"],
+          "correct_answer": "A",
+          "difficulty": "medium",
+          "bloom_level": "apply",
+          "tags": ["zeroes", "coefficients"]
+        },
+        {
+          "question_id": "MATH-10-LIN-MCQ-007",
+          "question_text": "If 3x + 4y = 7 and 6x + 8y = 15, then the pair of linear equations is:",
+          "chapter": "Pair of Linear Equations in Two Variables",
+          "topic": "Algebraic Methods",
+          "question_format": "MCQ",
+          "marks": 1,
+          "options": ["A) consistent with a unique solution", "B) inconsistent (no solution)", "C) consistent with infinitely many solutions", "D) none of these"],
+          "correct_answer": "B",
+          "difficulty": "medium",
+          "bloom_level": "analyze",
+          "tags": ["consistency", "linear equations"]
+        },
+        {
+          "question_id": "MATH-10-REA-MCQ-008",
+          "question_text": "Which of the following gives a correct proof that √3 is an irrational number?",
+          "chapter": "Real Numbers",
+          "topic": "Irrationality Proofs",
+          "question_format": "MCQ",
+          "marks": 1,
+          "options": ["A) Proof by contradiction showing both p and q divisible by 3", "B) Assume √3 = p/q and conclude p is even", "C) Show decimal expansion terminates", "D) 3 not a perfect square therefore rational"],
+          "correct_answer": "A",
+          "difficulty": "medium",
+          "bloom_level": "analyze",
+          "tags": ["irrationality", "proofs"]
+        },
+        {
+          "question_id": "MATH-10-POL-MCQ-009",
+          "question_text": "Let p(x) be a polynomial which, when divided by (x - 2)(x + 1), leaves a remainder of the form ax + b. If p(2) = 7 and p(-1) = -5, then the remainder R(x) is:",
+          "chapter": "Polynomials",
+          "topic": "Division Algorithm",
+          "question_format": "MCQ",
+          "marks": 1,
+          "options": ["A) 4x - 1", "B) 3x + 1", "C) x + 5", "D) 2x + 3"],
+          "correct_answer": "A",
+          "difficulty": "medium",
+          "bloom_level": "apply",
+          "tags": ["remainder", "polynomial division"]
+        },
+        {
+          "question_id": "MATH-10-POL-MCQ-010",
+          "question_text": "Let f(x) = 2x^3 + ax^2 + bx + 4. If (x + 1) is a factor of f(x) of multiplicity 2, then the ordered pair (a, b) is:",
+          "chapter": "Polynomials",
+          "topic": "Zeroes of Polynomial (Multiplicity)",
+          "question_format": "MCQ",
+          "marks": 1,
+          "options": ["A) (8, 10)", "B) (8, -10)", "C) (-8, 10)", "D) (10, 8)"],
+          "correct_answer": "A",
+          "difficulty": "hard",
+          "bloom_level": "analyze",
+          "tags": ["multiplicity", "polynomial"]
+        }
+      ]
+    },
+    {
+      "section_id": "B",
+      "title": "Short Answer Type",
+      "question_format": "SHORT",
+      "marks_per_question": 3,
+      "questions_provided": 5,
+      "questions_attempt": 5,
+      "questions": [
+        {
+          "question_id": "MATH-10-LIN-SA-001",
+          "question_text": "The sum of two numbers is 52. One number is three times the other. Find the two numbers.",
+          "chapter": "Pair of Linear Equations in Two Variables",
+          "topic": "Word Problems",
+          "question_format": "SHORT",
+          "marks": 3,
+          "difficulty": "easy",
+          "bloom_level": "apply",
+          "suggested_answer": "Let smaller = x, larger = 3x. x + 3x = 52 → 4x = 52 → x = 13. Numbers: 13 and 39.",
+          "tags": ["word problems", "linear equations"]
+        },
+        {
+          "question_id": "MATH-10-POL-SA-002",
+          "question_text": "Find the zeroes of the quadratic polynomial x^2 - 7x + 10. Verify that the sum and product of its zeroes agree with the relations sum = -b/a and product = c/a.",
+          "chapter": "Polynomials",
+          "topic": "Relationship between Zeroes Coefficients",
+          "question_format": "SHORT",
+          "marks": 3,
+          "difficulty": "easy",
+          "bloom_level": "understand",
+          "suggested_answer": "Factor: (x-5)(x-2). Zeroes: 5 and 2. Sum = 7 (= -b/a). Product = 10 (= c/a).",
+          "tags": ["zeroes", "verification"]
+        },
+        {
+          "question_id": "MATH-10-REA-SA-003",
+          "question_text": "Using Euclid's Division Algorithm, find the HCF of 544 and 119. Show your steps.",
+          "chapter": "Real Numbers",
+          "topic": "Euclid's Division Algorithm",
+          "question_format": "SHORT",
+          "marks": 3,
+          "difficulty": "medium",
+          "bloom_level": "apply",
+          "suggested_answer": "544 = 119×4 + 68; 119 = 68×1 + 51; 68 = 51×1 + 17; 51 = 17×3 + 0. HCF = 17.",
+          "tags": ["euclid", "hcf"]
+        },
+        {
+          "question_id": "MATH-10-LIN-SA-004",
+          "question_text": "A motorboat takes 1.5 hours to travel 45 km downstream and 3 hours to return the same distance upstream. Find the speed of the boat in still water and the speed of the stream.",
+          "chapter": "Pair of Linear Equations in Two Variables",
+          "topic": "Algebraic Methods",
+          "question_format": "SHORT",
+          "marks": 3,
+          "difficulty": "medium",
+          "bloom_level": "apply",
+          "suggested_answer": "Let v = boat speed, c = stream speed. v + c = 45/1.5 = 30; v - c = 45/3 = 15. Solve: v = 22.5 km/h, c = 7.5 km/h.",
+          "tags": ["applications", "speeds"]
+        },
+        {
+          "question_id": "MATH-10-REA-SA-005",
+          "question_text": "Prove that √3 is an irrational number.",
+          "chapter": "Real Numbers",
+          "topic": "Irrationality Proofs",
+          "question_format": "SHORT",
+          "marks": 3,
+          "difficulty": "hard",
+          "bloom_level": "analyze",
+          "suggested_answer": "Assume √3 = p/q in lowest terms. Then p^2 = 3q^2 → 3 divides p → p=3k → 9k^2 = 3q^2 → q^2 = 3k^2 so 3 divides q as well. Contradiction. Hence √3 is irrational.",
+          "tags": ["proof", "irrational"]
+        }
+      ]
+    },
+    {
+      "section_id": "C",
+      "title": "Long Answer Type",
+      "question_format": "LONG",
+      "marks_per_question": 5,
+      "questions_provided": 5,
+      "questions_attempt": 5,
+      "questions": [
+        {
+          "question_id": "MATH-10-POL-LA-001",
+          "question_text": "Divide the polynomial 2x^4 + 3x^3 - x^2 + 7x - 5 by x^2 + x - 2. Find the quotient and remainder. Verify the division algorithm by showing dividend = (divisor × quotient) + remainder.",
+          "chapter": "Polynomials",
+          "topic": "Division Algorithm",
+          "question_format": "LONG",
+          "marks": 5,
+          "difficulty": "easy",
+          "bloom_level": "apply",
+          "suggested_answer": "Quotient Q(x) = 2x^2 + x + 2, R(x) = 7x - 1. Verify by expanding (divisor×quotient)+remainder = dividend.",
+          "tags": ["polynomial division", "verification"]
+        },
+        {
+          "question_id": "MATH-10-LIN-LA-002",
+          "question_text": "A fruit seller sold 120 fruits consisting of apples at ₹6 each and oranges at ₹4 each and received ₹620. How many apples and oranges did he sell? Form pair of linear equations and solve. Verify your answer.",
+          "chapter": "Pair of Linear Equations in Two Variables",
+          "topic": "Word Problems",
+          "question_format": "LONG",
+          "marks": 5,
+          "difficulty": "medium",
+          "bloom_level": "apply",
+          "suggested_answer": "Let apples = x, oranges = y. x + y = 120; 6x + 4y = 620. Solve → x = 70, y = 50. Verification: 70×6 + 50×4 = 420 + 200 = 620.",
+          "tags": ["word problems", "linear equations"]
+        },
+        {
+          "question_id": "MATH-10-REA-LA-003",
+          "question_text": "Using the Fundamental Theorem of Arithmetic, express 1920 and 2700 as products of prime factors. Hence find the HCF and LCM of these two numbers by prime factorisation method. Verify that (HCF) × (LCM) = product of the two numbers.",
+          "chapter": "Real Numbers",
+          "topic": "Fundamental Theorem of Arithmetic",
+          "question_format": "LONG",
+          "marks": 5,
+          "difficulty": "medium",
+          "bloom_level": "analyze",
+          "suggested_answer": "1920 = 2^7 × 3 × 5; 2700 = 2^2 × 3^3 × 5^2. HCF = 2^2 × 3 × 5 = 60. LCM = 2^7 × 3^3 × 5^2 = 86400. Verify 60 × 86400 = 1920 × 2700 = 5,184,000.",
+          "tags": ["prime factorisation", "hcf lcm"]
+        },
+        {
+          "question_id": "MATH-10-POL-LA-004",
+          "question_text": "For which values of p and q does the following pair of linear equations have (i) a unique solution, (ii) no solution, and (iii) infinitely many solutions? Give reasons. 4x + 5y = 12; px + 5y = q.",
+          "chapter": "Pair of Linear Equations in Two Variables",
+          "topic": "Algebraic Methods",
+          "question_format": "LONG",
+          "marks": 5,
+          "difficulty": "hard",
+          "bloom_level": "analyze",
+          "suggested_answer": "Use ratio test. Unique solution if p ≠ 4. No solution if p = 4 and q ≠ 12. Infinitely many solutions if p = 4 and q = 12. (Reason: compare ratios a1/a2, b1/b2, c1/c2)",
+          "tags": ["consistency", "classification"]
+        },
+        {
+          "question_id": "MATH-10-POL-LA-005",
+          "question_text": "Let α and β be the zeroes of a quadratic polynomial with leading coefficient 2. If one zero is twice the other and the sum of their reciprocals is 3/5, find the quadratic polynomial (with integer coefficients). Verify the relations between zeroes and coefficients.",
+          "chapter": "Polynomials",
+          "topic": "Relationship between Zeroes Coefficients",
+          "question_format": "LONG",
+          "marks": 5,
+          "difficulty": "hard",
+          "bloom_level": "create",
+          "suggested_answer": "Let α = t, β = 2t. Given 1/t + 1/(2t) = 3/5 → (3/2)(1/t) = 3/5 → 1/t = 2/5 → t = 5/2, β = 5. Sum = 15/2, product = 25/2. For a = 2, b = -15, c = 25. Polynomial: 2x^2 - 15x + 25.",
+          "tags": ["zeroes", "vieta"]
+        }
+      ]
+    }
+  ],
+  "total_marks_check": 50,
+  "total_marks": 50,
+  "notes": "Generated from blueprint input/blueprint_first_term_50.json. Difficulty distribution: easy 8, medium 8, hard 4. All questions from specified chapters."
+}

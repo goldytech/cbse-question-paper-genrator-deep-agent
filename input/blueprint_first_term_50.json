@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "exam_metadata": {
+    "board": "CBSE",
+    "class": 10,
+    "subject": "Mathematics",
+    "exam_type": "First Term",
+    "total_marks": 50,
+    "duration_minutes": 120,
+    "academic_year": "2025-26"
+  },
+  "syllabus_scope": {
+    "chapters_included": [
+      "Real Numbers",
+      "Polynomials",
+      "Pair of Linear Equations in Two Variables"
+    ],
+    "topics": {
+      "Real Numbers": [
+        "Fundamental Theorem of Arithmetic",
+        "LCM HCF",
+        "Irrationality Proofs",
+        "Euclid's Division Algorithm"
+      ],
+      "Polynomials": [
+        "Zeroes of Polynomial",
+        "Relationship between Zeroes Coefficients",
+        "Division Algorithm"
+      ],
+      "Pair of Linear Equations in Two Variables": [
+        "Graphical Method",
+        "Algebraic Methods",
+        "Word Problems"
+      ]
+    }
+  },
+  "sections": [
+    {
+      "section_id": "A",
+      "title": "Multiple Choice Questions",
+      "question_format": "MCQ",
+      "marks_per_question": 1,
+      "internal_choice": {
+        "type": "none"
+      },
+      "questions_provided": 10,
+      "questions_attempt": 10
+    },
+    {
+      "section_id": "B",
+      "title": "Short Answer Type",
+      "question_format": "SHORT",
+      "marks_per_question": 3,
+      "internal_choice": {
+        "type": "none"
+      },
+      "questions_provided": 5,
+      "questions_attempt": 5
+    },
+    {
+      "section_id": "C",
+      "title": "Long Answer Type",
+      "question_format": "LONG",
+      "marks_per_question": 5,
+      "internal_choice": {
+        "type": "none"
+      },
+      "questions_provided": 5,
+      "questions_attempt": 5
+    }
+  ],
+  "special_note": "Total marks calculation: Section A (10 MCQ × 1 = 10 marks), Section B (5 SA × 3 = 15 marks), Section C (5 LA × 5 = 25 marks). Total = 10 + 15 + 25 = 50 marks exactly."
+}

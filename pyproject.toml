@@ -1,0 +1,87 @@
+[project]
+name = "cbse-question-paper-generator"
+version = "0.1.0"
+description = "Deep Agent for generating CBSE question papers from JSON blueprints"
+requires-python = ">=3.11"
+readme = "README.md"
+authors = [
+    {name = "CBSE Question Paper Generator", email = "info@example.com"}
+]
+license = {text = "MIT"}
+keywords = ["cbse", "question-paper", "deep-agents", "langchain", "agent"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Education",
+]
+
+dependencies = [
+    "deepagents>=0.3.9",
+    "langchain>=1.2.0",
+    "langchain-openai>=0.1.0",
+    "tavily-python>=0.7.20",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "rich>=14.3.1",
+    # NEW: Diagram and DOCX generation
+    "drawsvg>=2.4.1",           # For geometric diagrams (replacing geometry-svg)
+    "cairosvg>=2.7.0",          # For SVG to PNG conversion
+    "python-docx>=1.1.0",       # For DOCX generation
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+    "black>=24.0.0",
+    "ruff>=0.3.0",
+    "mypy>=1.9.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+include = [
+    "*.py",
+    "*.md",
+    "config/**/*.py",
+    "display/**/*.py",
+    "skills/**/*.md",
+    "skills/**/*.py",
+    "skills/**/*.json",
+    "tools/**/*.py",
+    "AGENTS.md",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+strict_optional = true
