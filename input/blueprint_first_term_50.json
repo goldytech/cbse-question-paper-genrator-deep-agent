@@ -1,73 +1,145 @@
 {
   "schema_version": "1.0",
-  "exam_metadata": {
-    "board": "CBSE",
+
+  "metadata": {
+    "teacher_id": "TCH_1023",
+    "school_id": "SCH_045",
+    "assessment_type": "Unit Test",
     "class": 10,
     "subject": "Mathematics",
-    "exam_type": "First Term",
-    "total_marks": 50,
-    "duration_minutes": 120,
-    "academic_year": "2025-26"
+    "subject_code": "041",
+    "variant": "STANDARD",
+    "total_marks": 40,
+    "master_blueprint_version": "maths-std-10-v1.0"
   },
+
   "syllabus_scope": {
-    "chapters_included": [
-      "Real Numbers",
-      "Polynomials",
-      "Pair of Linear Equations in Two Variables"
-    ],
-    "topics": {
-      "Real Numbers": [
-        "Fundamental Theorem of Arithmetic",
-        "LCM HCF",
-        "Irrationality Proofs",
-        "Euclid's Division Algorithm"
-      ],
-      "Polynomials": [
-        "Zeroes of Polynomial",
-        "Relationship between Zeroes Coefficients",
-        "Division Algorithm"
-      ],
-      "Pair of Linear Equations in Two Variables": [
-        "Graphical Method",
-        "Algebraic Methods",
-        "Word Problems"
-      ]
+    "chapters": [
+      {
+        "chapter_name": "Polynomials",
+        "topics": [
+          "Zeros of a Polynomial",
+          "Relationship between Zeros and Coefficients"
+        ]
+      },
+      {
+        "chapter_name": "Quadratic Equations",
+        "topics": [
+          "Nature of Roots",
+          "Solutions by Factorization"
+        ]
+      },
+      {
+        "chapter_name": "Arithmetic Progressions",
+        "topics": [
+          "nth Term of an AP",
+          "Finding Sum of First n Terms"
+        ]
+      }
+    ]
+  },
+
+  "advisory_preferences": {
+    "cognitive_mix_target": {
+      "remember_understand": 45,
+      "apply": 35,
+      "analyse_evaluate_create": 20
     }
   },
+
   "sections": [
     {
       "section_id": "A",
       "title": "Multiple Choice Questions",
       "question_format": "MCQ",
       "marks_per_question": 1,
-      "internal_choice": {
-        "type": "none"
-      },
-      "questions_provided": 10,
-      "questions_attempt": 10
+      "questions_provided": 8,
+      "questions_attempt": 8,
+      "allowed_question_natures": [
+        "NUMERICAL",
+        "REASONING"
+      ],
+      "cognitive_level_hint": [
+        "REMEMBER",
+        "UNDERSTAND"
+      ],
+      "topic_focus": [
+        "Zeros of a Polynomial",
+        "Nature of Roots"
+      ]
     },
+
     {
       "section_id": "B",
-      "title": "Short Answer Type",
-      "question_format": "SHORT",
-      "marks_per_question": 3,
-      "internal_choice": {
-        "type": "none"
-      },
+      "title": "Very Short Answer Questions",
+      "question_format": "VERY_SHORT",
+      "marks_per_question": 2,
       "questions_provided": 5,
-      "questions_attempt": 5
+      "questions_attempt": 5,
+      "allowed_question_natures": [
+        "NUMERICAL",
+        "REASONING"
+      ],
+      "cognitive_level_hint": [
+        "UNDERSTAND",
+        "APPLY"
+      ],
+      "topic_focus": [
+        "Relationship between Zeros and Coefficients",
+        "nth Term of an AP"
+      ]
     },
+
     {
       "section_id": "C",
-      "title": "Long Answer Type",
+      "title": "Short Answer Questions",
+      "question_format": "SHORT",
+      "marks_per_question": 3,
+      "questions_provided": 6,
+      "questions_attempt": 4,
+      "internal_choice": {
+        "type": "ANY_N_OUT_OF_M",
+        "provided": 6,
+        "attempt": 4
+      },
+      "allowed_question_natures": [
+        "NUMERICAL",
+        "WORD_PROBLEM"
+      ],
+      "cognitive_level_hint": [
+        "APPLY",
+        "ANALYSE"
+      ],
+      "topic_focus": [
+        "Solutions by Factorization",
+        "Sum of First n Terms of an AP"
+      ]
+    },
+
+    {
+      "section_id": "D",
+      "title": "Long Answer Questions",
       "question_format": "LONG",
       "marks_per_question": 5,
+      "questions_provided": 4,
+      "questions_attempt": 2,
       "internal_choice": {
-        "type": "none"
+        "type": "ANY_N_OUT_OF_M",
+        "provided": 4,
+        "attempt": 2
       },
-      "questions_provided": 5,
-      "questions_attempt": 5
+      "allowed_question_natures": [
+        "WORD_PROBLEM",
+        "DERIVATION"
+      ],
+      "cognitive_level_hint": [
+        "ANALYSE",
+        "EVALUATE"
+      ],
+      "topic_focus": [
+        "Applications of Quadratic Equations",
+        "Arithmetic Progression Word Problems"
+      ]
     }
-  ],
-  "special_note": "Total marks calculation: Section A (10 MCQ × 1 = 10 marks), Section B (5 SA × 3 = 15 marks), Section C (5 LA × 5 = 25 marks). Total = 10 + 15 + 25 = 50 marks exactly."
+  ]
 }
