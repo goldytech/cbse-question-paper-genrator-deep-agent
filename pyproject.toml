@@ -37,6 +37,7 @@ dependencies = [
 dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.24.0",
+    "pytest-cov>=5.0.0",
     "black>=24.0.0",
     "ruff>=0.3.0",
     "mypy>=1.9.0",
@@ -48,19 +49,14 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build]
 include = [
-    "*.py",
-    "*.md",
-    "config/**/*.py",
-    "display/**/*.py",
-    "skills/**/*.md",
-    "skills/**/*.py",
-    "skills/**/*.json",
-    "tools/**/*.py",
+    "src/**/*.py",
+    "src/**/*.md",
+    "src/**/*.json",
     "AGENTS.md",
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["."]
+packages = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

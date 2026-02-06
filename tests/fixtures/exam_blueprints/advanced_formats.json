@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.1",
+  "metadata": {
+    "teacher_id": "TCH_010",
+    "school_id": "SCH_010",
+    "assessment_type": "Unit Test",
+    "class": 10,
+    "subject": "Mathematics",
+    "subject_code": "041",
+    "variant": "STANDARD",
+    "total_marks": 40,
+    "master_blueprint_version": "maths-std-10-v1.1"
+  },
+  "syllabus_scope": {
+    "chapters": [
+      {
+        "chapter_name": "Polynomials",
+        "topics": [
+          "Zeros of a Polynomial"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "section_id": "A",
+      "title": "Multiple Choice Questions",
+      "question_format": "MCQ_ASSERTION_REASON",
+      "marks_per_question": 1,
+      "questions_provided": 10,
+      "questions_attempt": 10
+    },
+    {
+      "section_id": "B",
+      "title": "Case Study",
+      "question_format": "CASE_STUDY",
+      "marks_per_question": 4,
+      "questions_provided": 5,
+      "questions_attempt": 5,
+      "internal_choice": {
+        "type": "EITHER_OR",
+        "provided": 5,
+        "attempt": 5
+      }
+    }
+  ]
+}

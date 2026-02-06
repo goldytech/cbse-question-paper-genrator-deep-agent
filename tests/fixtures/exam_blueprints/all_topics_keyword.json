@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.1",
+  "metadata": {
+    "teacher_id": "TCH_007",
+    "school_id": "SCH_007",
+    "assessment_type": "Unit Test",
+    "class": 10,
+    "subject": "Mathematics",
+    "subject_code": "041",
+    "variant": "STANDARD",
+    "total_marks": 40,
+    "master_blueprint_version": "maths-std-10-v1.1"
+  },
+  "syllabus_scope": {
+    "chapters": [
+      {
+        "chapter_name": "Polynomials",
+        "topics": [
+          "ALL_TOPICS"
+        ]
+      },
+      {
+        "chapter_name": "Quadratic Equations",
+        "topics": [
+          "Nature of Roots"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "section_id": "A",
+      "title": "Multiple Choice Questions",
+      "question_format": "MCQ",
+      "marks_per_question": 1,
+      "questions_provided": 10,
+      "questions_attempt": 10,
+      "topic_focus": [
+        "Any Topic Allowed Here"
+      ]
+    }
+  ]
+}

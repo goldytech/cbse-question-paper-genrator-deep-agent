@@ -12,32 +12,85 @@ def get_subagent_definitions() -> List[Dict]:
         List of subagent dictionaries for create_deep_agent
     """
     # Import tools for subagents
-    from tools.curriculum_searcher import search_cbse_curriculum_tool
-    from tools.blueprint_validator import validate_blueprint_tool
-    from tools.paper_validator import validate_paper_tool
-    from tools.diagram_generator import generate_diagram_tool
-    from tools.docx_generator import generate_docx_tool
+    from src.tools.curriculum_searcher import search_cbse_curriculum_tool
+    from src.tools.blueprint_validator import validate_blueprint_tool
+    from src.tools.paper_validator import validate_paper_tool
+    from src.tools.diagram_generator import generate_diagram_tool
+    from src.tools.docx_generator import generate_docx_tool
 
     return [
         {
             "name": "blueprint-validator",
-            "description": "Validates CBSE blueprint JSON constraints using validate_blueprint_tool. Use when you need to check if a blueprint file is valid before generating questions.",
+            "description": "Validates CBSE exam blueprints against master policy blueprints using two-blueprint validation. Use when you need to check if an exam blueprint is valid before generating questions.",
             "system_prompt": """You are a blueprint validation specialist for CBSE question papers.
 
-Your role:
-1. Use the validate_blueprint_tool to validate the blueprint at the given path
-2. The tool checks:
-   - Required fields (exam_metadata, syllabus_scope, sections)
-   - Total marks calculation accuracy
-   - Internal choice types (none/any_n_out_of_m/either_or)
-   - Question format validity
-   - Marks per question values
-3. Review the validation results
-4. Return a clear summary: {valid: bool, errors: [], warnings: []}
+## Two-Blueprint Validation System
+You validate EXAM blueprints against MASTER POLICY blueprints:
+- **Exam Blueprint**: Teacher-provided file (e.g., input/blueprint_first_term_50.json) containing exam specifications
+- **Master Policy Blueprint**: Auto-discovered at skills/{class}/{subject}/references/blueprint.json containing validation rules
 
-CRITICAL: If validation fails, return specific error details. Do NOT proceed with invalid blueprint.
+## Validation Checks
 
-Use the validate_blueprint_tool - do NOT try to manually validate by reading the file.""",
+The tool automatically performs these validations:
+
+1. **Schema Version Check**:
+   - Exam blueprint schema_version must match master policy blueprint schema_version
+   - Example: If master is "1.1", exam must be "1.1"
+
+2. **Question Format Whitelist** (Strict Check):
+   - All section question_format values must be in master's allowed_question_formats whitelist
+   - Common formats: MCQ, MCQ_ASSERTION_REASON, VERY_SHORT, SHORT, LONG, CASE_STUDY
+   - Invalid formats cause validation failure
+
+3. **Internal Choice Arithmetic** (Strict Check):
+   - For internal_choice.type = "ANY_N_OUT_OF_M": questions_attempt must be ≤ provided
+   - Supported types: ANY_N_OUT_OF_M, EITHER_OR
+   - attempt > provided causes validation failure
+
+4. **Syllabus Scope Enforcement** (Strict Check):
+   - Each chapter must have non-empty topics array (if topic_selection_required: true in master)
+   - Topics can be explicit list OR ["ALL_TOPICS"] keyword
+   - Missing topics causes validation failure
+
+5. **Topic Scope Enforcement** (Strict Check):
+   - Section topic_focus arrays must be subsets of syllabus topics
+   - If chapter has ["ALL_TOPICS"], any topic is accepted for that chapter
+   - Invalid topics not in syllabus cause validation failure
+
+6. **Enforcement Mode**:
+   - STRICT: Fail validation on any error (default)
+   - ADVISORY: Log warnings but continue (only for advisory checks)
+   - DISABLED: Skip advisory checks entirely
+
+## Validation Response Format
+
+Returns:
+```json
+{
+  "valid": true/false,
+  "errors": ["Error 1", "Error 2"],
+  "warnings": ["Warning 1"],
+  "validation_details": {
+    "schema_version": "1.1",
+    "enforcement_mode": "STRICT",
+    "strict_checks_passed": ["QUESTION_FORMAT_WHITELIST", ...],
+    "strict_checks_failed": [],
+    "advisory_checks_warnings": []
+  }
+}
+```
+
+## Your Role
+1. Call validate_blueprint_tool with exam_blueprint_path
+2. Master blueprint auto-discovers from exam blueprint metadata
+3. Review validation_details to understand which checks passed/failed
+4. If valid: return success with all checks that passed
+5. If invalid: return specific errors from the errors array
+
+CRITICAL: 
+- If validation fails (valid: false), return specific error details
+- Do NOT proceed with question generation until blueprint is valid
+- The tool handles all validation logic - do NOT manually validate""",
             "tools": [validate_blueprint_tool],
         },
         {

@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.1",
+  "metadata": {
+    "teacher_id": "TCH_001",
+    "school_id": "SCH_001",
+    "assessment_type": "Unit Test",
+    "class": 10,
+    "subject": "Mathematics",
+    "subject_code": "041",
+    "variant": "STANDARD",
+    "total_marks": 40,
+    "master_blueprint_version": "maths-std-10-v1.1"
+  },
+  "syllabus_scope": {
+    "chapters": [
+      {
+        "chapter_name": "Polynomials",
+        "topics": [
+          "Zeros of a Polynomial",
+          "Relationship between Zeros and Coefficients"
+        ]
+      },
+      {
+        "chapter_name": "Quadratic Equations",
+        "topics": [
+          "Nature of Roots",
+          "Solutions by Factorization"
+        ]
+      }
+    ]
+  },
+  "advisory_preferences": {
+    "cognitive_mix_target": {
+      "remember_understand": 45,
+      "apply": 35,
+      "analyse_evaluate_create": 20
+    }
+  },
+  "sections": [
+    {
+      "section_id": "A",
+      "title": "Multiple Choice Questions",
+      "question_format": "MCQ",
+      "marks_per_question": 1,
+      "questions_provided": 8,
+      "questions_attempt": 8,
+      "allowed_question_natures": [
+        "NUMERICAL",
+        "REASONING"
+      ],
+      "cognitive_level_hint": [
+        "REMEMBER",
+        "UNDERSTAND"
+      ],
+      "topic_focus": [
+        "Zeros of a Polynomial"
+      ]
+    },
+    {
+      "section_id": "B",
+      "title": "Very Short Answer Questions",
+      "question_format": "VERY_SHORT",
+      "marks_per_question": 2,
+      "questions_provided": 5,
+      "questions_attempt": 5,
+      "allowed_question_natures": [
+        "NUMERICAL",
+        "REASONING"
+      ],
+      "cognitive_level_hint": [
+        "UNDERSTAND",
+        "APPLY"
+      ],
+      "topic_focus": [
+        "Relationship between Zeros and Coefficients"
+      ]
+    }
+  ]
+}

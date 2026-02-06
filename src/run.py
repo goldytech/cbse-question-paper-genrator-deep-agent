@@ -17,7 +17,7 @@ from langgraph.types import Command
 
 load_dotenv()
 
-from display.agent_display import QuestionPaperAgentDisplay, convert_json_to_text
+from src.display.agent_display import QuestionPaperAgentDisplay, convert_json_to_text
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
@@ -520,9 +520,9 @@ def create_agent():
     from deepagents import create_deep_agent
     from deepagents.backends.filesystem import FilesystemBackend
     from langgraph.checkpoint.memory import MemorySaver
-    from config.agent_config import get_subagent_definitions, get_tools, configure_interrupt_on
+    from src.config.agent_config import get_subagent_definitions, get_tools, configure_interrupt_on
 
-    project_root = Path(__file__).parent.absolute()
+    project_root = Path(__file__).parent.parent.absolute()
     subagents = get_subagent_definitions()
     tools = get_tools()
 
@@ -530,7 +530,7 @@ def create_agent():
         model="openai:gpt-5-mini",
         backend=FilesystemBackend(root_dir=project_root, virtual_mode=True),
         memory=["./AGENTS.md"],
-        skills=["./skills/"],
+        skills=["./src/skills/"],
         subagents=subagents,
         tools=tools,
         # Enable standard HITL for write_file - custom handling in run_agent_with_live_display()

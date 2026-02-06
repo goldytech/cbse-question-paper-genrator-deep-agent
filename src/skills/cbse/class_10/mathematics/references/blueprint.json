@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.1",
+  "blueprint_version": "maths-std-10-v1.1",
+
+  "subject_metadata": {
+    "board": "CBSE",
+    "class": 10,
+    "subject": "Mathematics",
+    "subject_code": "041",
+    "variant": "STANDARD"
+  },
+
+  "assessment_scope": "EXTERNAL_THEORY_ONLY",
+
+  "allowed_question_formats": [
+    "MCQ",
+    "MCQ_ASSERTION_REASON",
+    "VERY_SHORT",
+    "SHORT",
+    "LONG",
+    "CASE_STUDY"
+  ],
+
+  "allowed_question_natures": [
+    "NUMERICAL",
+    "PROOF",
+    "WORD_PROBLEM",
+    "REASONING",
+    "DERIVATION",
+    "DATA_INTERPRETATION"
+  ],
+
+  "syllabus_granularity_policy": {
+    "chapter_selection_required": true,
+    "topic_selection_required": true,
+    "allow_all_topics_keyword": true,
+    "all_topics_keyword": "ALL_TOPICS",
+    "topic_level_is_primary_constraint": true
+  },
+
+  "internal_choice_rules": {
+    "supported_types": [
+      "ANY_N_OUT_OF_M",
+      "EITHER_OR"
+    ],
+    "constraints": {
+      "provided_must_be_greater_or_equal_to_attempt": true
+    }
+  },
+
+  "cognitive_levels": {
+    "definitions": [
+      "REMEMBER",
+      "UNDERSTAND",
+      "APPLY",
+      "ANALYSE",
+      "EVALUATE",
+      "CREATE"
+    ],
+
+    "cbse_recommended_distribution": {
+      "remember_understand": {
+        "recommended_percent": 54,
+        "acceptable_range": [50, 60]
+      },
+      "apply": {
+        "recommended_percent": 24,
+        "acceptable_range": [20, 30]
+      },
+      "analyse_evaluate_create": {
+        "recommended_percent": 22,
+        "acceptable_range": [15, 25]
+      }
+    },
+
+    "enforcement_mode": "ADVISORY"
+  },
+
+  "diagram_and_data_requirements": {
+    "diagram_based_questions_allowed": true,
+    "diagram_alternative_required_for_vi": true,
+
+    "data_handling": {
+      "tables_allowed": true,
+      "graphs_allowed": true,
+      "graph_types": [
+        "HISTOGRAM",
+        "FREQUENCY_POLYGON",
+        "OGIVE"
+      ]
+    }
+  },
+
+  "case_study_rules": {
+    "case_paragraph_required": true,
+    "default_sub_question_pattern": [
+      { "marks": 1 },
+      { "marks": 1 },
+      { "marks": 2 }
+    ],
+    "sub_question_count_fixed": true
+  },
+
+  "accessibility_rules": {
+    "visually_impaired_alternative_required": true,
+    "alternative_should_be_non_diagrammatic": true
+  },
+
+  "validation_policies": {
+    "strict_checks": [
+      "QUESTION_FORMAT_WHITELIST",
+      "INTERNAL_CHOICE_ARITHMETIC",
+      "SYLLABUS_SCOPE_ENFORCEMENT",
+      "TOPIC_SCOPE_ENFORCEMENT"
+    ],
+    "advisory_checks": [
+      "COGNITIVE_DISTRIBUTION",
+      "QUESTION_NATURE_BALANCE",
+      "INTERNAL_CHOICE_PRESENCE",
+      "DIAGRAM_VI_COVERAGE"
+    ]
+  }
+}

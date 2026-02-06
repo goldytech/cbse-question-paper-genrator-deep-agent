@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.1",
+  "metadata": {
+    "teacher_id": "TCH_009",
+    "school_id": "SCH_009",
+    "assessment_type": "Unit Test",
+    "class": 10,
+    "subject": "Mathematics",
+    "subject_code": "041",
+    "variant": "STANDARD",
+    "total_marks": 40,
+    "master_blueprint_version": "maths-std-10-v1.1"
+  },
+  "syllabus_scope": {
+    "chapters": [
+      {
+        "chapter_name": "Polynomials"
+      },
+      {
+        "chapter_name": "Quadratic Equations",
+        "topics": [
+          "Nature of Roots"
+        ]
+      }
+    ]
+  },
+  "sections": [
+    {
+      "section_id": "A",
+      "title": "Invalid Format Questions",
+      "question_format": "INVALID_FORMAT",
+      "marks_per_question": 1,
+      "questions_provided": 8,
+      "questions_attempt": 10,
+      "internal_choice": {
+        "type": "INVALID_TYPE",
+        "provided": 8,
+        "attempt": 10
+      },
+      "topic_focus": [
+        "Non-Existent Topic 1",
+        "Non-Existent Topic 2"
+      ]
+    },
+    {
+      "section_id": "B",
+      "title": "Another Section",
+      "question_format": "ANOTHER_INVALID",
+      "marks_per_question": 2,
+      "questions_provided": 5,
+      "questions_attempt": 5,
+      "topic_focus": [
+        "Also Invalid Topic"
+      ]
+    }
+  ]
+}
