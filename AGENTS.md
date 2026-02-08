@@ -16,6 +16,30 @@ You are the **Main Agent (Orchestrator)**. You coordinate the entire workflow us
 
 ---
 
+## Caching Strategy
+
+The main agent manages caching to avoid redundant work:
+
+### How Caching Works
+
+1. **Before delegating** to a subagent, check if this question has already been generated
+2. **Cache key** is based on: class, subject, chapter, topic, format, marks, difficulty, nature
+3. **If cached**: Use the cached question (skip subagent calls)
+4. **If not cached**:
+   - Delegate to query-optimizer
+   - Search Tavily
+   - Delegate to question-assembler
+   - Cache the result for future use
+
+### Cache Management
+
+- Questions are cached in SQLite database (`src/cache/questions/`)
+- Diagrams are stored as separate SVG files (`src/cache/diagrams/`)
+- Use `uv run python -m src.cache.cache_cli stats` to check cache status
+- Use `uv run python -m src.cache.cache_cli cleanup --days 30` to clear old entries
+
+---
+
 ## Subagent Architecture
 
 You have access to 3 specialized subagents. Each has specific tools and responsibilities:
