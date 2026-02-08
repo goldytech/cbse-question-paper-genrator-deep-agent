@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.1",
+  "metadata": {
+    "teacher_id": "TCH_1026",
+    "school_id": "SCH_045",
+    "assessment_type": "Unit Test",
+    "class": 10,
+    "subject": "Science",
+    "subject_code": "086",
+    "variant": "STANDARD",
+    "total_marks": 40,
+    "master_blueprint_version": "science-std-10-v1.0"
+  },
+  "syllabus_scope": {
+    "chapters": [
+      {
+        "chapter_name": "Chemical Reactions and Equations",
+        "topics": ["Types of Chemical Reactions", "Balancing Chemical Equations"]
+      },
+      {
+        "chapter_name": "Acids, Bases and Salts",
+        "topics": ["Properties of Acids and Bases", "pH Scale"]
+      }
+    ]
+  },
+  "advisory_preferences": {
+    "cognitive_mix_target": {
+      "remember_understand": 40,
+      "apply": 40,
+      "analyse_evaluate_create": 20
+    }
+  },
+  "sections": [
+    {
+      "section_id": "A",
+      "title": "Multiple Choice Questions",
+      "question_format": "MCQ",
+      "marks_per_question": 1,
+      "questions_provided": 8,
+      "questions_attempt": 8
+    },
+    {
+      "section_id": "B",
+      "title": "Very Short Answer Questions",
+      "question_format": "VERY_SHORT",
+      "marks_per_question": 2,
+      "questions_provided": 5,
+      "questions_attempt": 5
+    },
+    {
+      "section_id": "C",
+      "title": "Short Answer Questions",
+      "question_format": "SHORT",
+      "marks_per_question": 3,
+      "questions_provided": 6,
+      "questions_attempt": 4,
+      "internal_choice": {"type": "ANY_N_OUT_OF_M", "provided": 6, "attempt": 4}
+    },
+    {
+      "section_id": "D",
+      "title": "Long Answer Questions",
+      "question_format": "LONG",
+      "marks_per_question": 5,
+      "questions_provided": 4,
+      "questions_attempt": 2,
+      "internal_choice": {"type": "ANY_N_OUT_OF_M", "provided": 4, "attempt": 2}
+    }
+  ]
+}

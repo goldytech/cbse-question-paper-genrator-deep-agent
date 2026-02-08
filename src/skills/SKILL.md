@@ -11,13 +11,87 @@ metadata:
 ## Overview
 This skill provides comprehensive guidance for generating CBSE-compliant Class 10 Mathematics question papers from blueprints.
 
+## Input Folder Structure
+
+The system uses a hierarchical folder structure for organizing blueprints by class and subject:
+
+```
+input/classes/
+├── {class}/
+│   └── {subject}/
+│       ├── blueprint.json              # Master blueprint (system default)
+│       └── input_*.json               # Teacher files (overrides master)
+```
+
+### File Naming Conventions
+
+| File Type | Pattern | Purpose | Priority |
+|-----------|---------|---------|----------|
+| Master Blueprint | `blueprint.json` | System default specifications | Low |
+| Teacher Input | `input_*.json` | Teacher overrides | High |
+
+**Examples:**
+- Master: `input/classes/10/mathematics/blueprint.json`
+- Teacher: `input/classes/10/mathematics/input_first_term_50.json`
+- Teacher: `input/classes/9/science/input_half_yearly.json`
+
+### Blueprint Discovery Algorithm
+
+When no explicit path is provided:
+
+1. **Scan** `input/classes/*/*/` recursively for all `.json` files
+2. **Categorize** files:
+   - Teacher files: Names matching `input_*.json`
+   - Master files: Named exactly `blueprint.json`
+3. **Select** based on priority:
+   - If teacher files exist → Use most recent teacher file
+   - Else if master files exist → Use most recent master file
+   - Else → Report error
+4. **Return** relative path with forward slashes (e.g., `input/classes/10/mathematics/blueprint.json`)
+
+### Master vs Teacher Blueprints
+
+**Master Blueprint** (`blueprint.json`):
+- System-defined default specifications
+- Contains validation rules and constraints
+- Located at `input/classes/{class}/{subject}/blueprint.json`
+- Validated against master policy blueprint at `skills/cbse/class_{class}/{subject}/references/blueprint.json`
+
+**Teacher Blueprint** (`input_*.json`):
+- Teacher-defined exam specifications
+- Overrides master blueprint when present
+- Should follow same schema as master blueprint
+- Can customize: sections, topics, difficulty distribution, question formats
+
 ## Question Paper Generation Workflow
 
 ### Step 1: Discover Exam Blueprint
 
-The exam blueprint can be:
-- **Auto-discovered**: From `input/` folder (most recent JSON file)
-- **Teacher-provided**: Explicit path provided (e.g., `input/blueprint_first_term_50.json`)
+The exam blueprint is discovered from the `input/classes/{class}/{subject}/` folder structure:
+
+**Folder Structure:**
+```
+input/classes/
+├── 10/mathematics/
+│   ├── blueprint.json              # Master blueprint (system default)
+│   └── input_first_term_50.json   # Teacher file (overrides master)
+├── 10/science/
+│   └── blueprint.json
+└── 9/mathematics/
+    └── blueprint.json
+```
+
+**Discovery Priority:**
+1. **Teacher files** (`input_*.json`): Take precedence - teacher overrides master blueprint
+2. **Master blueprints** (`blueprint.json`): Fallback when no teacher file exists
+3. **Most recent file**: Selected by modification timestamp when multiple files exist
+
+**Auto-discovery Logic:**
+- Searches recursively in `input/classes/*/*/` directory
+- Prefers files starting with `input_` over `blueprint.json`
+- Falls back to most recent `.json` file if neither pattern matches
+
+**Teacher-provided path**: Explicit path provided (e.g., `input/classes/10/mathematics/blueprint.json`)
 
 **Master Policy Blueprint**: Auto-discovered at `skills/cbse/class_10/mathematics/references/blueprint.json`
 
@@ -26,7 +100,7 @@ The exam blueprint can be:
 **ALWAYS validate first** using blueprint-validator subagent:
 ```
 task(name="blueprint-validator", 
-     task="Validate exam blueprint at path: input/blueprint_first_term_50.json")
+     task="Validate exam blueprint at path: input/classes/10/mathematics/blueprint.json")
 ```
 
 **Validation checks**:
@@ -96,7 +170,7 @@ task(name="question-researcher",
 
 ### Step 4: Create Final Question Object
 
-From the rephrased template, create final question:
+From the rephrased template, create the final question:
 
 ```json
 {
@@ -152,7 +226,7 @@ From the rephrased template, create final question:
 **Validate generated paper** against original blueprint:
 ```
 task(name="paper-validator", 
-     task="Validate paper at output/preview_*.json against input/blueprint_first_term_50.json")
+     task="Validate paper at output/preview_*.json against input/classes/10/mathematics/blueprint.json")
 ```
 
 **Fix any validation issues** before presenting to teacher.

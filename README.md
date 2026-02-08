@@ -210,26 +210,28 @@ TAVILY_API_KEY=tvly-your-key-here  # Optional but recommended
 
 ### Step 4: Prepare Input Folder
 ```bash
-# Create input directory
-mkdir -p input
+# Create input directory structure
+mkdir -p input/classes/10/mathematics
 
 # Add your blueprint JSON file(s)
-# Example: input/blueprint_first_term_50.json
+# Example: input/classes/10/mathematics/blueprint.json
+# Teacher files: input/classes/10/mathematics/input_first_term_50.json
 ```
 
 ## Getting Started
 
 ### Quick Start - Auto Discovery
 
-If you have one blueprint file in `input/` folder:
+If you have one blueprint file in `input/classes/` folder structure:
 
 ```bash
 python run.py "Generate Class 10 Mathematics question paper"
 ```
 
 The agent will:
-1. Auto-discover the most recent `.json` file in `input/`
-2. Load and validate the blueprint
+1. Auto-discover the most recent `.json` file in `input/classes/*/*/`
+2. Prioritizes teacher files (`input_*.json`) over master blueprints (`blueprint.json`)
+3. Load and validate the blueprint
 3. Generate questions using subagents
 4. **Auto-detect and generate diagrams** for geometry/coordinate questions
 5. Show formatted preview (text + diagram descriptions) for approval
@@ -238,7 +240,7 @@ The agent will:
 ### Specify Blueprint Explicitly
 
 ```bash
-python run.py "Generate paper using input/blueprint_first_term_50.json"
+python run.py "Generate paper using input/classes/10/mathematics/blueprint.json"
 ```
 
 ### Example Session
@@ -246,20 +248,20 @@ python run.py "Generate paper using input/blueprint_first_term_50.json"
 ```bash
 $ python run.py "Generate Class 10 Mathematics first term paper"
 
-              Blueprint Configuration             
-┌──────────┬────────────────────────────────────┐
-│ File     │ input/blueprint_first_term_50.json │
-│ Location │ input/ folder (auto-discovered)    │
-└──────────┴────────────────────────────────────┘
+              Blueprint Configuration
+┌──────────┬─────────────────────────────────────────────────┐
+│ File     │ input/classes/10/mathematics/blueprint.json     │
+│ Location │ input/classes/10/mathematics/ (auto-discovered) │
+└──────────┴─────────────────────────────────────────────────┘
 
 Creating CBSE Question Paper Generator agent...
 Agent created successfully!
 
 CBSE Question Paper Generator
-Task: Generate a CBSE question paper using blueprint input/blueprint_first_term_50.json...
+Task: Generate a CBSE question paper using blueprint input/classes/10/mathematics/blueprint.json...
 Using Live Streaming with Human-in-the-Loop...
 
-✓ Loaded blueprint: input/blueprint_first_term_50.json
+✓ Loaded blueprint: input/classes/10/mathematics/blueprint.json
 Will save to: output/mathematics_class10_first_term_20260201_143052_a7f3d.json
 
   ▶ Subagent: blueprint-validator
@@ -465,7 +467,11 @@ question-paper-generator-agent/
 ├── display/                        # UI components
 │   └── agent_display.py           # Live display & HITL
 ├── input/                          # Blueprint files
-│   └── blueprint_first_term_50.json
+│   └── classes/
+│       └── 10/
+│           └── mathematics/
+│               ├── blueprint.json              # Master blueprint
+│               └── input_first_term_50.json   # Teacher file
 ├── output/                         # Generated papers
 │   ├── *.json                     # Question papers
 │   └── docx/                      # NEW: Generated DOCX files

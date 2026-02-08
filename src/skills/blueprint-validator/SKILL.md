@@ -65,7 +65,7 @@ Contains CBSE validation rules:
 Return JSON:
 ```json
 {
-  "valid": true|false,
+  "valid": "true or false",
   "errors": ["Error message 1", "Error message 2"],
   "warnings": ["Warning message 1"],
   "validation_details": {

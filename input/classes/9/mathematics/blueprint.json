@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.1",
+
+  "metadata": {
+    "teacher_id": "TCH_1024",
+    "school_id": "SCH_045",
+    "assessment_type": "Unit Test",
+    "class": 9,
+    "subject": "Mathematics",
+    "subject_code": "041",
+    "variant": "STANDARD",
+    "total_marks": 40,
+    "master_blueprint_version": "maths-std-9-v1.0"
+  },
+
+  "syllabus_scope": {
+    "chapters": [
+      {
+        "chapter_name": "Number Systems",
+        "topics": [
+          "Irrational Numbers",
+          "Real Numbers and Their Decimal Expansions"
+        ]
+      },
+      {
+        "chapter_name": "Polynomials",
+        "topics": [
+          "Polynomials in One Variable",
+          "Zeroes of a Polynomial"
+        ]
+      },
+      {
+        "chapter_name": "Coordinate Geometry",
+        "topics": [
+          "Cartesian System",
+          "Plotting Points in the Plane"
+        ]
+      }
+    ]
+  },
+
+  "advisory_preferences": {
+    "cognitive_mix_target": {
+      "remember_understand": 50,
+      "apply": 35,
+      "analyse_evaluate_create": 15
+    }
+  },
+
+  "sections": [
+    {
+      "section_id": "A",
+      "title": "Multiple Choice Questions",
+      "question_format": "MCQ",
+      "marks_per_question": 1,
+      "questions_provided": 8,
+      "questions_attempt": 8,
+      "allowed_question_natures": [
+        "NUMERICAL",
+        "REASONING"
+      ],
+      "cognitive_level_hint": [
+        "REMEMBER",
+        "UNDERSTAND"
+      ],
+      "topic_focus": [
+        "Irrational Numbers",
+        "Polynomials in One Variable"
+      ]
+    },
+
+    {
+      "section_id": "B",
+      "title": "Very Short Answer Questions",
+      "question_format": "VERY_SHORT",
+      "marks_per_question": 2,
+      "questions_provided": 5,
+      "questions_attempt": 5,
+      "allowed_question_natures": [
+        "NUMERICAL",
+        "REASONING"
+      ],
+      "cognitive_level_hint": [
+        "UNDERSTAND",
+        "APPLY"
+      ],
+      "topic_focus": [
+        "Real Numbers and Their Decimal Expansions",
+        "Zeroes of a Polynomial"
+      ]
+    },
+
+    {
+      "section_id": "C",
+      "title": "Short Answer Questions",
+      "question_format": "SHORT",
+      "marks_per_question": 3,
+      "questions_provided": 6,
+      "questions_attempt": 4,
+      "internal_choice": {
+        "type": "ANY_N_OUT_OF_M",
+        "provided": 6,
+        "attempt": 4
+      },
+      "allowed_question_natures": [
+        "NUMERICAL",
+        "WORD_PROBLEM"
+      ],
+      "cognitive_level_hint": [
+        "APPLY",
+        "ANALYSE"
+      ],
+      "topic_focus": [
+        "Cartesian System",
+        "Plotting Points in the Plane"
+      ]
+    },
+
+    {
+      "section_id": "D",
+      "title": "Long Answer Questions",
+      "question_format": "LONG",
+      "marks_per_question": 5,
+      "questions_provided": 4,
+      "questions_attempt": 2,
+      "internal_choice": {
+        "type": "ANY_N_OUT_OF_M",
+        "provided": 4,
+        "attempt": 2
+      },
+      "allowed_question_natures": [
+        "WORD_PROBLEM",
+        "DERIVATION"
+      ],
+      "cognitive_level_hint": [
+        "ANALYSE",
+        "EVALUATE"
+      ],
+      "topic_focus": [
+        "Applications of Coordinate Geometry",
+        "Number System Problems"
+      ]
+    }
+  ]
+}

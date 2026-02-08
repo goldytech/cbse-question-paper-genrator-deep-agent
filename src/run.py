@@ -150,10 +150,15 @@ def generate_output_filename(blueprint_path: str, blueprint_data: dict) -> str:
 def find_blueprint_path(task):
     """Extract blueprint path from task or discover in input folder.
 
-    Returns a relative path (e.g., 'input/blueprint.json') for FilesystemBackend compatibility.
-    """
-    input_dir = Path("input")
+    Supports two blueprint types:
+    - Master blueprint: input/classes/{class}/{subject}/blueprint.json
+    - Teacher input file: input/classes/{class}/{subject}/input_*.json
 
+    Returns a relative path (e.g., 'input/classes/10/mathematics/blueprint.json') for FilesystemBackend compatibility.
+    """
+    classes_dir = Path("input/classes")
+
+    # First, check if a specific path is provided in the task
     words = task.split()
     for word in words:
         if word.startswith("input/") and word.endswith(".json"):
@@ -161,16 +166,34 @@ def find_blueprint_path(task):
         if word.startswith("output/") and word.endswith(".json"):
             return word
 
-    if input_dir.exists():
-        json_files = list(input_dir.glob("*.json"))
-        if json_files:
-            # Return a relative path with forward slashes for FilesystemBackend
-            latest_file = max(json_files, key=lambda f: f.stat().st_mtime)
+    # Auto-discovery in the new folder structure
+    if classes_dir.exists():
+        # Search for all JSON files in the classes directory
+        all_json_files = list(classes_dir.rglob("*.json"))
+
+        if all_json_files:
+            # Priority 1: Look for teacher input files (input_*.json) - these override master blueprints
+            teacher_files = [f for f in all_json_files if f.name.startswith("input_")]
+
+            # Priority 2: Look for master blueprint.json files
+            master_files = [f for f in all_json_files if f.name == "blueprint.json"]
+
+            # Select the most recent file (prefer teacher files, then master files)
+            if teacher_files:
+                latest_file = max(teacher_files, key=lambda f: f.stat().st_mtime)
+            elif master_files:
+                latest_file = max(master_files, key=lambda f: f.stat().st_mtime)
+            else:
+                # Fallback: use any JSON file found
+                latest_file = max(all_json_files, key=lambda f: f.stat().st_mtime)
+
             return str(latest_file).replace("\\", "/")
 
     raise FileNotFoundError(
         "No blueprint file found. Please provide a blueprint path in your task "
-        "or place a blueprint JSON file in the input/ folder."
+        "or place a blueprint JSON file in the input/classes/{class}/{subject}/ folder. "
+        "Expected structure: input/classes/{class}/{subject}/blueprint.json (master) or "
+        "input/classes/{class}/{subject}/input_*.json (teacher file)"
     )
 
 

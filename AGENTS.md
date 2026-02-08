@@ -51,11 +51,11 @@ You have access to 3 specialized subagents. Each has specific tools and responsi
 
 **How to invoke**:
 ```
-task(name="blueprint-validator", task="Validate exam blueprint at path: input/blueprint_first_term_50.json")
+task(name="blueprint-validator", task="Validate exam blueprint at path: input/classes/10/mathematics/blueprint.json")
 ```
 
 **Two-Blueprint Validation**:
-- **Exam Blueprint**: Teacher-provided file (e.g., `input/blueprint_first_term_50.json`) containing exam specifications
+- **Exam Blueprint**: Teacher-provided file (e.g., `input/classes/10/mathematics/input_first_term_50.json`) containing exam specifications
 - **Master Policy Blueprint**: Auto-discovered at `skills/{class}/{subject}/references/blueprint.json` containing validation rules
 - Validator checks exam blueprint against master policy rules
 
@@ -142,7 +142,7 @@ task(name="question-assembler",
 **How to invoke**:
 ```
 task(name="paper-validator", 
-     task="Validate paper at output/question_paper.json against blueprint at input/blueprint_first_term_50.json")
+     task="Validate paper at output/question_paper.json against blueprint at input/classes/10/mathematics/blueprint.json")
 ```
 
 **Example Return**:
@@ -216,9 +216,24 @@ When a teacher provides a prompt (e.g. "Generate Class 10 Mathematics question p
 
 ### Step 1: Read the Blueprint
 - Extract blueprint file path from the teacher's request
-- Look for patterns like `input/*.json` or any path ending in `.json`
-- If no path provided, discover the most recent `.json` file in the `input/` folder
+- Look for patterns like `input/classes/*/*/*.json` or any path ending in `.json`
+- If no path provided, discover the most recent `.json` file in the `input/classes/{class}/{subject}/` folder
+- Search priority:
+  1. Teacher input files: `input_*.json` (teacher overrides master blueprint)
+  2. Master blueprints: `blueprint.json`
 - If no `.json` files found, report error and do NOT proceed
+
+**Expected Folder Structure:**
+```
+input/classes/
+├── 10/mathematics/
+│   ├── blueprint.json              # Master blueprint (system default)
+│   └── input_first_term_50.json    # Teacher file (input_ prefix, overrides master)
+├── 10/science/
+│   └── blueprint.json
+└── 9/mathematics/
+    └── blueprint.json
+```
 
 ### Step 2: Validate Blueprint (DELEGATE)
 ```
@@ -306,11 +321,11 @@ task(name="paper-validator",
 **Your Actions**:
 
 ### 1. Extract Blueprint Path
-- Discover file: `input/blueprint_first_term_50.json`
+- Discover file: `input/classes/10/mathematics/blueprint.json`
 
 ### 2. Validate Blueprint
 ```
-task(name="blueprint-validator", task="Validate exam blueprint at path: input/blueprint_first_term_50.json")
+task(name="blueprint-validator", task="Validate exam blueprint at path: input/classes/10/mathematics/blueprint.json")
 ```
 
 **Response**:
@@ -336,7 +351,7 @@ task(name="blueprint-validator", task="Validate exam blueprint at path: input/bl
 ✅ Blueprint is valid. Proceed.
 
 **Two-Blueprint Validation Details**:
-- Exam blueprint: `input/blueprint_first_term_50.json` (teacher-provided)
+- Exam blueprint: `input/classes/10/mathematics/blueprint.json` (teacher-provided)
 - Master policy blueprint: `skills/cbse/class_10/mathematics/references/blueprint.json` (auto-discovered)
 - Validated against master policy schema with all strict checks passed
 
@@ -419,7 +434,7 @@ Repeat for all questions...
 ### 7. Validate Paper
 ```
 task(name="paper-validator", 
-     task="Validate paper at output/question_paper.json against input/blueprint_first_term_50.json")
+     task="Validate paper at output/question_paper.json against input/classes/10/mathematics/blueprint.json")
 ```
 
 **Response**:
@@ -433,7 +448,8 @@ task(name="paper-validator",
 ✅ Paper is valid.
 
 ### 8. Save and Present
-- Save to `output/question_paper.json`
+- Save to `output/{subject}_class{class}_{exam_type}_YYYYMMDD_HHMMSS_{id}.json`
+- Example: `output/mathematics_class10_first_term_20250129_143052_a7f3d.json`
 - Present to teacher: "Generated 20 questions (10 MCQ + 5 SA + 5 LA) for 50 marks covering Real Numbers, Polynomials, and Linear Equations. All validations passed."
 
 ---
@@ -742,7 +758,7 @@ mathematics_class10_first_term_20250129_143052_a7f3d.json
 ### Components:
 - **subject**: Subject name from blueprint (lowercase, spaces→underscores)
 - **class**: Class number from blueprint (e.g., "class10")
-- **exam_type**: Extracted from blueprint filename (e.g., "first_term" from "blueprint_first_term_50.json")
+- **exam_type**: Extracted from blueprint filename (e.g., "first_term" from "input_first_term_50.json")
 - **YYYYMMDD_HHMMSS**: Timestamp of generation (24-hour format)
 - **short_id**: First 5 characters of UUID (ensures uniqueness)
 
