@@ -165,6 +165,11 @@ class DiagramStorage:
                 return f.read()
         return None
 
+    def get_metadata(self, key: str) -> Optional[Dict]:
+        """Retrieve diagram metadata by key."""
+        index = self._load_index()
+        return index.get(key)
+
     def _load_index(self) -> Dict:
         if self.index_file.exists():
             with open(self.index_file, "r") as f:
@@ -494,3 +499,27 @@ def generate_question_paper_tool(
         return {"success": False, "error": f"Invalid JSON in blueprint: {str(e)}"}
     except Exception as e:
         return {"success": False, "error": f"Generation error: {str(e)}"}
+
+
+def _distribute_difficulties(total_questions: int) -> Dict[str, int]:
+    """
+    Distribute questions according to 40/40/20 rule.
+
+    Args:
+        total_questions: Total number of questions to distribute
+
+    Returns:
+        Dict with counts for easy, medium, hard
+    """
+    if total_questions == 0:
+        return {"easy": 0, "medium": 0, "hard": 0}
+
+    easy_count = int(total_questions * 0.4)
+    medium_count = int(total_questions * 0.4)
+    hard_count = total_questions - easy_count - medium_count
+
+    return {
+        "easy": easy_count,
+        "medium": medium_count,
+        "hard": hard_count,
+    }
