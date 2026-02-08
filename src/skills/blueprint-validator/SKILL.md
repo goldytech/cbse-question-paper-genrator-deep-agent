@@ -156,7 +156,7 @@ Return JSON:
 
 ## Error Handling
 
-- **File not found**: Return error with specific path
+- **File isn’t found**: Return error with a specific path
 - **Invalid JSON**: Return error with parsing details
 - **Missing required fields**: List all missing fields
 - **Schema mismatch**: Show expected vs actual versions

@@ -145,6 +145,64 @@ Analyze the question content for these keywords:
 4. Define `diagram_elements` (structured data)
 5. Generate diagram using `generate_diagram_tool`
 
+### Diagram Workflow
+
+The complete diagram workflow within question assembly:
+
+1. **Analyze Question Content**
+   - Parse the generated question text
+   - Scan for diagram-related keywords (listed above)
+   - Determine if visualization adds value
+
+2. **Determine Diagram Type**
+   - **geometric**: For geometry, trigonometry questions
+   - **coordinate**: For graphs, plots, coordinate geometry
+   - **chart**: For statistics, histograms, data representation
+   - **formula**: For complex mathematical expressions
+
+3. **Create Diagram Description**
+   - Write detailed textual description of the diagram
+   - Include all elements, labels, and measurements
+   - Make it accessible for screen readers
+   - Example: "Right-angled triangle ABC with right angle at vertex C. Side AC extends vertically for 6 cm, side BC extends horizontally for 8 cm."
+
+4. **Define Diagram Elements**
+   - Structure data for diagram generation
+   - Include: shape type, points, sides, angles, coordinates
+   - Example:
+     ```json
+     {
+       "shape": "right_triangle",
+       "points": ["A", "B", "C"],
+       "sides": ["AC=6 cm", "BC=8 cm", "AB=?"],
+       "angles": ["∠C=90°"]
+     }
+     ```
+
+5. **Generate Diagram**
+   - Call `generate_diagram_tool` with description and elements
+   - Receive SVG base64 and file path
+   - Store reference in question object
+
+### Diagram Storage
+
+- Diagrams are stored as separate SVG files (not embedded in JSON)
+- Location: `src/cache/diagrams/`
+- Each diagram has a unique key based on content hash
+- Questions reference diagrams by key for reuse across papers
+- Diagrams can be reused if same geometry is needed again
+
+### Diagram Quality Standards
+
+All diagrams must meet these standards:
+
+- **Clarity**: Elements clearly visible and properly labeled
+- **Accuracy**: Measurements and positions mathematically correct
+- **Consistency**: Similar diagrams use consistent styling (colors, line thickness, fonts)
+- **Accessibility**: Include descriptive alt-text for screen readers
+- **Professional Quality**: Suitable for CBSE exam papers
+- **Proper Sizing**: Large enough to be readable when printed
+
 ## Quality Standards
 
 All questions must meet these CBSE standards:

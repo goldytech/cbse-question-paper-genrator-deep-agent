@@ -9,6 +9,7 @@ from typing import Dict, Any, List
 from blueprint_validation.tool import validate_blueprint_tool
 from paper_validation.tool import validate_paper_tool
 from diagram_generation.tool import generate_diagram_tool
+from docx_generation.tool import generate_docx_tool
 
 # Skill root path
 SKILL_ROOT = "src/skills"
@@ -51,10 +52,20 @@ PAPER_VALIDATOR_SUBAGENT: Dict[str, Any] = {
     "skills": [f"{SKILL_ROOT}/paper-validator/"],
 }
 
+# DOCX Generator Subagent Configuration
+DOCX_GENERATOR_SUBAGENT: Dict[str, Any] = {
+    "name": "docx-generator",
+    "description": "Converts approved JSON question papers to DOCX format with embedded diagrams. Use ONLY AFTER teacher approves the JSON question paper.",
+    "model": "openai:gpt-4o",
+    "tools": [generate_docx_tool],
+    "skills": [f"{SKILL_ROOT}/docx-generator/"],
+}
+
 # List of all subagents for registration
 ALL_SUBAGENTS: List[Dict[str, Any]] = [
     BLUEPRINT_VALIDATOR_SUBAGENT,
     QUERY_OPTIMIZER_SUBAGENT,
     QUESTION_ASSEMBLER_SUBAGENT,
     PAPER_VALIDATOR_SUBAGENT,
+    DOCX_GENERATOR_SUBAGENT,
 ]
