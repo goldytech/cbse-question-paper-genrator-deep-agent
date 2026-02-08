@@ -19,3 +19,13 @@ wheels/
 # Cache directories
 cache/
 src/cache/
+
+# Coverage data
+.coverage
+.coverage.*
+
+# IDE configuration
+.idea/
+.vscode/
+*.swp
+*.swo

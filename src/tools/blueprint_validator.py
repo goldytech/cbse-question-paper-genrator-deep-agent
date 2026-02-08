@@ -1,6 +1,6 @@
 """Blueprint validation tool for CBSE question papers.
 
-Validates exam blueprints against master policy blueprints (Schema 1.1).
+Validates exam blueprints against master policy blueprints using two-blueprint validation.
 """
 
 import json
@@ -13,16 +13,14 @@ from langchain_core.tools import tool
 def validate_blueprint_tool(
     exam_blueprint_path: str,
     master_blueprint_path: Optional[str] = None,
-    validate_rules: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
-    Validates exam blueprint against master policy blueprint (Schema 1.1).
+    Validates exam blueprint against the master policy blueprint.
 
     Args:
         exam_blueprint_path: Path to exam blueprint (teacher-provided)
         master_blueprint_path: Path to master policy blueprint (optional, auto-discovers
                               from exam blueprint class/subject if not provided)
-        validate_rules: Optional list of validation rules to check
 
     Returns:
         {
@@ -47,7 +45,7 @@ def validate_blueprint_tool(
         with open(exam_blueprint_path, "r", encoding="utf-8") as f:
             exam_blueprint = json.load(f)
 
-        # 2. Discover master blueprint path if not provided
+        # 2. Discover a master blueprint path if not provided
         if not master_blueprint_path:
             master_blueprint_path = _discover_master_blueprint_path(exam_blueprint)
 
@@ -59,19 +57,29 @@ def validate_blueprint_tool(
         with open(master_blueprint_path, "r", encoding="utf-8") as f:
             master_blueprint = json.load(f)
 
-        # 4. Schema version check
-        exam_schema_version = exam_blueprint.get("schema_version", "1.0")
-        if exam_schema_version != "1.1":
+        # 4. Schema version check - compare exam with master blueprint
+        exam_schema_version = exam_blueprint.get("schema_version")
+        master_schema_version = master_blueprint.get("schema_version")
+
+        if not exam_schema_version:
+            errors.append("Missing schema_version in exam blueprint.")
+            return _create_result(False, errors, warnings, validation_details)
+
+        if not master_schema_version:
+            errors.append("Missing schema_version in master blueprint.")
+            return _create_result(False, errors, warnings, validation_details)
+
+        if exam_schema_version != master_schema_version:
             errors.append(
-                f"Invalid schema_version: expected '1.1', got '{exam_schema_version}'. "
-                f"Please update exam blueprint to schema version 1.1."
+                f"Schema version mismatch: exam blueprint has '{exam_schema_version}', "
+                f"but master blueprint requires '{master_schema_version}'."
             )
             validation_details["schema_version"] = exam_schema_version
             return _create_result(False, errors, warnings, validation_details)
 
         validation_details["schema_version"] = exam_schema_version
 
-        # 5. Get validation policies from master blueprint
+        # 5. Get validation policies from the master blueprint
         validation_policies = master_blueprint.get("validation_policies", {})
         strict_checks = validation_policies.get("strict_checks", [])
         advisory_checks = validation_policies.get("advisory_checks", [])
@@ -81,7 +89,7 @@ def validate_blueprint_tool(
         enforcement_mode = cognitive_levels.get("enforcement_mode", "STRICT")
         validation_details["enforcement_mode"] = enforcement_mode
 
-        # 7. Get whitelists from master blueprint
+        # 7. Get whitelists from the master blueprint
         allowed_question_formats = master_blueprint.get("allowed_question_formats", [])
         allowed_question_natures = master_blueprint.get("allowed_question_natures", [])
         internal_choice_supported_types = master_blueprint.get("internal_choice_rules", {}).get(
@@ -101,80 +109,92 @@ def validate_blueprint_tool(
         strict_checks_failed = []
         advisory_checks_warnings = []
 
-        # 9. Apply strict checks
+        # 9. Apply strict checks using match-case
         for check in strict_checks:
-            if check == "QUESTION_FORMAT_WHITELIST":
-                result = _validate_question_format_whitelist(
-                    exam_blueprint, allowed_question_formats
-                )
-                if result["valid"]:
-                    strict_checks_passed.append(check)
-                else:
-                    if enforcement_mode in ["STRICT", "ADVISORY"]:
-                        _handle_validation_result(
-                            result, errors, warnings, strict_checks_failed, enforcement_mode
-                        )
+            match check:
+                case "QUESTION_FORMAT_WHITELIST":
+                    result = _validate_question_format_whitelist(
+                        exam_blueprint, allowed_question_formats
+                    )
+                    if result["valid"]:
+                        strict_checks_passed.append(check)
+                    else:
+                        if enforcement_mode in ["STRICT", "ADVISORY"]:
+                            _handle_validation_result(
+                                result, errors, warnings, strict_checks_failed, enforcement_mode
+                            )
 
-            elif check == "INTERNAL_CHOICE_ARITHMETIC":
-                result = _validate_internal_choice_arithmetic(
-                    exam_blueprint, internal_choice_supported_types
-                )
-                if result["valid"]:
-                    strict_checks_passed.append(check)
-                else:
-                    if enforcement_mode in ["STRICT", "ADVISORY"]:
-                        _handle_validation_result(
-                            result, errors, warnings, strict_checks_failed, enforcement_mode
-                        )
+                case "INTERNAL_CHOICE_ARITHMETIC":
+                    result = _validate_internal_choice_arithmetic(
+                        exam_blueprint, internal_choice_supported_types
+                    )
+                    if result["valid"]:
+                        strict_checks_passed.append(check)
+                    else:
+                        if enforcement_mode in ["STRICT", "ADVISORY"]:
+                            _handle_validation_result(
+                                result, errors, warnings, strict_checks_failed, enforcement_mode
+                            )
 
-            elif check == "SYLLABUS_SCOPE_ENFORCEMENT":
-                result = _validate_syllabus_scope_enforcement(
-                    exam_blueprint, topic_selection_required, all_topics_keyword
-                )
-                if result["valid"]:
-                    strict_checks_passed.append(check)
-                else:
-                    if enforcement_mode in ["STRICT", "ADVISORY"]:
-                        _handle_validation_result(
-                            result, errors, warnings, strict_checks_failed, enforcement_mode
-                        )
+                case "SYLLABUS_SCOPE_ENFORCEMENT":
+                    result = _validate_syllabus_scope_enforcement(
+                        exam_blueprint, topic_selection_required, all_topics_keyword
+                    )
+                    if result["valid"]:
+                        strict_checks_passed.append(check)
+                    else:
+                        if enforcement_mode in ["STRICT", "ADVISORY"]:
+                            _handle_validation_result(
+                                result, errors, warnings, strict_checks_failed, enforcement_mode
+                            )
 
-            elif check == "TOPIC_SCOPE_ENFORCEMENT":
-                result = _validate_topic_scope_enforcement(
-                    exam_blueprint, all_topics_keyword, topic_level_is_primary_constraint
-                )
-                if result["valid"]:
-                    strict_checks_passed.append(check)
-                else:
-                    if enforcement_mode in ["STRICT", "ADVISORY"]:
-                        _handle_validation_result(
-                            result, errors, warnings, strict_checks_failed, enforcement_mode
-                        )
+                case "TOPIC_SCOPE_ENFORCEMENT":
+                    result = _validate_topic_scope_enforcement(
+                        exam_blueprint, all_topics_keyword, topic_level_is_primary_constraint
+                    )
+                    if result["valid"]:
+                        strict_checks_passed.append(check)
+                    else:
+                        if enforcement_mode in ["STRICT", "ADVISORY"]:
+                            _handle_validation_result(
+                                result, errors, warnings, strict_checks_failed, enforcement_mode
+                            )
 
-        # 10. Apply advisory checks (only warnings)
+                case _:
+                    # Unknown strict check - skip or log warning
+                    warnings.append(f"Unknown strict check: {check}")
+
+        # 10. Apply advisory checks (only warnings) using match-case
         for check in advisory_checks:
             if enforcement_mode == "DISABLED":
                 continue
 
-            if check == "COGNITIVE_DISTRIBUTION":
-                result = _validate_cognitive_distribution(exam_blueprint, master_blueprint)
-                if not result["valid"]:
-                    advisory_checks_warnings.extend(result["errors"])
+            match check:
+                case "COGNITIVE_DISTRIBUTION":
+                    result = _validate_cognitive_distribution(exam_blueprint, master_blueprint)
+                    if not result["valid"]:
+                        advisory_checks_warnings.extend(result["errors"])
 
-            elif check == "QUESTION_NATURE_BALANCE":
-                result = _validate_question_nature_balance(exam_blueprint, allowed_question_natures)
-                if not result["valid"]:
-                    advisory_checks_warnings.extend(result["errors"])
+                case "QUESTION_NATURE_BALANCE":
+                    result = _validate_question_nature_balance(
+                        exam_blueprint, allowed_question_natures
+                    )
+                    if not result["valid"]:
+                        advisory_checks_warnings.extend(result["errors"])
 
-            elif check == "INTERNAL_CHOICE_PRESENCE":
-                result = _validate_internal_choice_presence(exam_blueprint)
-                if not result["valid"]:
-                    advisory_checks_warnings.extend(result["errors"])
+                case "INTERNAL_CHOICE_PRESENCE":
+                    result = _validate_internal_choice_presence(exam_blueprint)
+                    if not result["valid"]:
+                        advisory_checks_warnings.extend(result["errors"])
 
-            elif check == "DIAGRAM_VI_COVERAGE":
-                result = _validate_diagram_vi_coverage(exam_blueprint, master_blueprint)
-                if not result["valid"]:
-                    advisory_checks_warnings.extend(result["errors"])
+                case "DIAGRAM_VI_COVERAGE":
+                    result = _validate_diagram_vi_coverage(exam_blueprint, master_blueprint)
+                    if not result["valid"]:
+                        advisory_checks_warnings.extend(result["errors"])
+
+                case _:
+                    # Unknown advisory check - skip
+                    pass
 
         validation_details.update(
             {
@@ -219,12 +239,13 @@ def _handle_validation_result(
     enforcement_mode: str,
 ):
     """Handle validation result based on enforcement mode."""
-    if enforcement_mode == "STRICT":
-        errors.extend(result["errors"])
-        failed_checks.append(result.get("check_name", "Unknown"))
-    elif enforcement_mode == "ADVISORY":
-        # In advisory mode, strict checks become warnings
-        warnings.extend(result["errors"])
+    match enforcement_mode:
+        case "STRICT":
+            errors.extend(result["errors"])
+            failed_checks.append(result.get("check_name", "Unknown"))
+        case "ADVISORY":
+            # In advisory mode, strict checks become warnings
+            warnings.extend(result["errors"])
 
 
 def _validate_question_format_whitelist(
