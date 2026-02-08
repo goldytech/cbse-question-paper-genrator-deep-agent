@@ -3,14 +3,11 @@ Main run function for CBSE Question Paper Generator with Live Display.
 """
 
 import asyncio
-import os
-import sys
 import json
 import re
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Dict, Any, Any as AnyType, List
 
 from dotenv import load_dotenv
 from langgraph.types import Command
@@ -29,7 +26,7 @@ def should_trigger_hitl(file_path: str) -> bool:
     """
     Determine if Human-in-the-Loop should be triggered for this file write.
 
-    HITL is triggered ONLY for final question papers in output/ folder.
+    HITL is triggered ONLY for final question papers in the output/ folder.
     Auto-approve all other file operations.
 
     Args:
@@ -38,7 +35,7 @@ def should_trigger_hitl(file_path: str) -> bool:
     Returns:
         True if HITL should be triggered, False for auto-approval
     """
-    # Must be in output directory
+    # Must be in the output directory
     if "output/" not in file_path and not file_path.startswith("output"):
         return False
 
@@ -153,7 +150,7 @@ def generate_output_filename(blueprint_path: str, blueprint_data: dict) -> str:
 def find_blueprint_path(task):
     """Extract blueprint path from task or discover in input folder.
 
-    Returns relative path (e.g., 'input/blueprint.json') for FilesystemBackend compatibility.
+    Returns a relative path (e.g., 'input/blueprint.json') for FilesystemBackend compatibility.
     """
     input_dir = Path("input")
 
@@ -167,7 +164,7 @@ def find_blueprint_path(task):
     if input_dir.exists():
         json_files = list(input_dir.glob("*.json"))
         if json_files:
-            # Return relative path with forward slashes for FilesystemBackend
+            # Return a relative path with forward slashes for FilesystemBackend
             latest_file = max(json_files, key=lambda f: f.stat().st_mtime)
             return str(latest_file).replace("\\", "/")
 
@@ -244,7 +241,7 @@ async def run_agent_with_live_display(agent, task, blueprint_path, thread_id="se
     try:
         with open(blueprint_path, "r", encoding="utf-8") as f:
             content = f.read()
-            # Use normalized path (forward slashes) for FilesystemBackend
+            # Use a normalized path (forward slashes) for FilesystemBackend
             files[normalized_path] = create_file_data(content)
             # Parse blueprint for metadata
             blueprint_data = json.loads(content)
@@ -253,7 +250,7 @@ async def run_agent_with_live_display(agent, task, blueprint_path, thread_id="se
         console_local.print(f"[red]✗ Failed to load blueprint: {e}[/]")
         raise
 
-    # Generate dynamic output filename based on blueprint metadata
+    # Generate a dynamic output filename based on blueprint metadata
     output_filename = generate_output_filename(blueprint_path, blueprint_data)
     console_local.print(f"[dim]Will save to: {output_filename}[/]")
 
@@ -543,7 +540,6 @@ def create_agent():
 async def main_async():
     import sys
     import os
-    from pathlib import Path
 
     if len(sys.argv) > 1:
         short_task = " ".join(sys.argv[1:])

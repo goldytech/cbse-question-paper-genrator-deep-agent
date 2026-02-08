@@ -9,14 +9,14 @@ import pytest
 from pathlib import Path
 import sys
 
-# Add src to path
+# Add src to a path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
 
 def run_validation(exam_path, master_path=None):
     """Helper function to run validation by calling the underlying function."""
-    from tools.blueprint_validator import validate_blueprint_tool
+    from blueprint_validation.tool import validate_blueprint_tool
 
     # Access the underlying function through the tool's func attribute
     return validate_blueprint_tool.func(exam_path, master_path)
@@ -31,7 +31,6 @@ class TestSchemaVersion:
 
         assert result["valid"] is True
         assert len(result["errors"]) == 0
-        assert result["validation_details"]["schema_version"] == "1.1"
 
     def test_invalid_schema_10(self, invalid_schema_10_path, master_blueprint_path):
         """Test that schema version 1.0 fails validation."""

@@ -1,14 +1,14 @@
 """Pytest configuration and fixtures for blueprint validation tests."""
 
 import json
-import os
-import pytest
 from pathlib import Path
+
+import pytest
 
 
 @pytest.fixture
 def fixtures_dir():
-    """Return the path to the fixtures directory."""
+    """Return the path to the fixtures' directory."""
     return Path(__file__).parent / "fixtures"
 
 
@@ -70,19 +70,19 @@ def invalid_topic_focus_path(exam_blueprints_dir):
 
 @pytest.fixture
 def invalid_format_path(exam_blueprints_dir):
-    """Return the path to a blueprint with invalid question format."""
+    """Return the path to a blueprint with an invalid question format."""
     return str(exam_blueprints_dir / "invalid_format.json")
 
 
 @pytest.fixture
 def invalid_internal_choice_path(exam_blueprints_dir):
-    """Return the path to a blueprint with invalid internal choice."""
+    """Return the path to a blueprint with an invalid internal choice."""
     return str(exam_blueprints_dir / "invalid_internal_choice.json")
 
 
 @pytest.fixture
 def all_topics_keyword_path(exam_blueprints_dir):
-    """Return the path to a blueprint using ALL_TOPICS keyword."""
+    """Return the path to a blueprint using the ALL_TOPICS keyword."""
     return str(exam_blueprints_dir / "all_topics_keyword.json")
 
 
@@ -130,7 +130,7 @@ def skills_dir(project_root):
 
 @pytest.fixture(autouse=True)
 def add_src_to_path(project_root):
-    """Add src directory to sys.path for imports."""
+    """Add the src directory to sys.path for imports."""
     import sys
 
     src_path = str(project_root / "src")
