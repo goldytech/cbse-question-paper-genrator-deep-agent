@@ -16,7 +16,7 @@ This system generates high-quality, CBSE-compliant question papers through an in
 - **docx-generator**: **NEW** - Generates professional DOCX documents with embedded images
 
 ### 🎯 Intelligent Question Generation
-- Searches real CBSE questions online using Tavily
+- Searches real CBSE questions online <!-- using Tavily -->
 - Rephrases questions to create unique variants while preserving concepts
 - Maintains CBSE difficulty distribution (40% easy, 40% medium, 20% hard)
 - Follows official CBSE question formats and standards

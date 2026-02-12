@@ -16,24 +16,28 @@
   "syllabus_scope": {
     "chapters": [
       {
+        "chapter_name": "Real Numbers",
+        "topics": [
+          "Euclid’s Division Algorithm",
+          "Fundamental Theorem of Arithmetic",
+          "HCF and LCM using Prime Factorisation"
+        ]
+      },
+      {
         "chapter_name": "Polynomials",
         "topics": [
           "Zeros of a Polynomial",
-          "Relationship between Zeros and Coefficients"
+          "Geometrical Meaning of Zeroes",
+          "Relationship between Zeroes and Coefficients"
         ]
       },
       {
-        "chapter_name": "Quadratic Equations",
+        "chapter_name": "Pair of Linear Equations in Two Variables",
         "topics": [
-          "Nature of Roots",
-          "Solutions by Factorization"
-        ]
-      },
-      {
-        "chapter_name": "Arithmetic Progressions",
-        "topics": [
-          "nth Term of an AP",
-          "Finding Sum of First n Terms"
+          "Graphical Method",
+          "Consistency of Linear Equations",
+          "Substitution Method",
+          "Elimination Method"
         ]
       }
     ]
@@ -57,15 +61,16 @@
       "questions_attempt": 8,
       "allowed_question_natures": [
         "NUMERICAL",
-        "REASONING"
+        "CONCEPTUAL"
       ],
       "cognitive_level_hint": [
         "REMEMBER",
         "UNDERSTAND"
       ],
       "topic_focus": [
+        "Euclid’s Division Algorithm",
         "Zeros of a Polynomial",
-        "Nature of Roots"
+        "Consistency of Linear Equations"
       ]
     },
 
@@ -85,8 +90,9 @@
         "APPLY"
       ],
       "topic_focus": [
-        "Relationship between Zeros and Coefficients",
-        "nth Term of an AP"
+        "HCF and LCM using Prime Factorisation",
+        "Geometrical Meaning of Zeroes",
+        "Graphical Method"
       ]
     },
 
@@ -111,8 +117,9 @@
         "ANALYSE"
       ],
       "topic_focus": [
-        "Solutions by Factorization",
-        "Sum of First n Terms of an AP"
+        "Relationship between Zeroes and Coefficients",
+        "Substitution Method",
+        "Elimination Method"
       ]
     },
 
@@ -137,8 +144,9 @@
         "EVALUATE"
       ],
       "topic_focus": [
-        "Applications of Quadratic Equations",
-        "Arithmetic Progression Word Problems"
+        "Fundamental Theorem of Arithmetic",
+        "Graphical Method",
+        "Word Problems on Linear Equations"
       ]
     }
   ]

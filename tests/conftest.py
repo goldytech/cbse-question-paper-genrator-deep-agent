@@ -106,36 +106,43 @@ def sample_requirements_hard():
     )
 
 
-@pytest.fixture
-def sample_tavily_results():
-    """Return sample Tavily search results."""
-    return [
-        {
-            "title": f"CBSE Question {i}",
-            "content": f"Sample question content about polynomials {i}. Find the zeros of x² - 5x + 6.",
-            "url": f"https://example.com/question-{i}",
-        }
-        for i in range(15)
-    ]
-
-
-@pytest.fixture
-def mock_tavily_client():
-    """Mock Tavily client for testing."""
-    with patch("question_generation.orchestrator._get_tavily_client") as mock:
-        client = Mock()
-        client.search.return_value = {
-            "results": [
-                {
-                    "title": f"Result {i}",
-                    "content": f"Content {i}",
-                    "url": f"http://test{i}.com",
-                }
-                for i in range(15)
-            ]
-        }
-        mock.return_value = client
-        yield client
+# =============================================================================
+# TAVILY TEST FIXTURES - DISABLED
+# =============================================================================
+# These fixtures were used for testing Tavily search functionality.
+# They are commented out pending Qdrant vector database integration.
+#
+# @pytest.fixture
+# def sample_tavily_results():
+#     """Return sample Tavily search results."""
+#     return [
+#         {
+#             "title": f"CBSE Question {i}",
+#             "content": f"Sample question content about polynomials {i}. Find the zeros of x² - 5x + 6.",
+#             "url": f"https://example.com/question-{i}",
+#         }
+#         for i in range(15)
+#     ]
+#
+#
+# @pytest.fixture
+# def mock_tavily_client():
+#     """Mock Tavily client for testing."""
+#     with patch("question_generation.orchestrator._get_tavily_client") as mock:
+#         client = Mock()
+#         client.search.return_value = {
+#             "results": [
+#                 {
+#                     "title": f"Result {i}",
+#                     "content": f"Content {i}",
+#                     "url": f"http://test{i}.com",
+#                 }
+#                 for i in range(15)
+#             ]
+#         }
+#         mock.return_value = client
+#         yield client
+# =============================================================================
 
 
 @pytest.fixture
@@ -188,3 +195,105 @@ def event_loop():
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
+
+
+# =============================================================================
+# BLUEPRINT VALIDATOR TEST FIXTURES
+# =============================================================================
+# Fixtures for blueprint validation tests using fixture files
+
+FIXTURES_DIR = Path(__file__).parent / "fixtures"
+EXAM_BLUEPRINTS_DIR = FIXTURES_DIR / "exam_blueprints"
+MASTER_BLUEPRINTS_DIR = FIXTURES_DIR / "master_blueprints"
+
+
+@pytest.fixture
+def valid_exam_blueprint_path():
+    """Path to a valid exam blueprint for testing."""
+    return str(EXAM_BLUEPRINTS_DIR / "valid_schema_11.json")
+
+
+@pytest.fixture
+def invalid_schema_10_path():
+    """Path to an exam blueprint with invalid schema version."""
+    return str(EXAM_BLUEPRINTS_DIR / "invalid_schema_10.json")
+
+
+@pytest.fixture
+def invalid_format_path():
+    """Path to an exam blueprint with invalid question format."""
+    return str(EXAM_BLUEPRINTS_DIR / "invalid_format.json")
+
+
+@pytest.fixture
+def invalid_internal_choice_path():
+    """Path to an exam blueprint with invalid internal choice configuration."""
+    return str(EXAM_BLUEPRINTS_DIR / "invalid_internal_choice.json")
+
+
+@pytest.fixture
+def missing_topics_path():
+    """Path to an exam blueprint with missing topics in syllabus scope."""
+    return str(EXAM_BLUEPRINTS_DIR / "missing_topics.json")
+
+
+@pytest.fixture
+def all_topics_keyword_path():
+    """Path to an exam blueprint using ALL_TOPICS keyword."""
+    return str(EXAM_BLUEPRINTS_DIR / "all_topics_keyword.json")
+
+
+@pytest.fixture
+def missing_topic_focus_path():
+    """Path to an exam blueprint with missing topic_focus in sections."""
+    return str(EXAM_BLUEPRINTS_DIR / "missing_topic_focus.json")
+
+
+@pytest.fixture
+def invalid_topic_focus_path():
+    """Path to an exam blueprint with invalid topic_focus values."""
+    return str(EXAM_BLUEPRINTS_DIR / "invalid_topic_focus.json")
+
+
+@pytest.fixture
+def invalid_topic_focus_type_path():
+    """Path to an exam blueprint with invalid topic_focus type."""
+    return str(EXAM_BLUEPRINTS_DIR / "invalid_topic_focus_type.json")
+
+
+@pytest.fixture
+def comprehensive_violations_path():
+    """Path to an exam blueprint with multiple violations."""
+    return str(EXAM_BLUEPRINTS_DIR / "comprehensive_violations.json")
+
+
+@pytest.fixture
+def advanced_formats_path():
+    """Path to an exam blueprint with advanced question formats."""
+    return str(EXAM_BLUEPRINTS_DIR / "advanced_formats.json")
+
+
+@pytest.fixture
+def master_blueprint_path():
+    """Path to the master policy blueprint for validation."""
+    return str(MASTER_BLUEPRINTS_DIR / "mathematics_class10.json")
+
+
+@pytest.fixture
+def project_root():
+    """Path to the project root directory."""
+    return Path(__file__).parent.parent
+
+
+@pytest.fixture
+def master_blueprint_data():
+    """Load master policy blueprint data for testing."""
+    with open(MASTER_BLUEPRINTS_DIR / "mathematics_class10.json", "r") as f:
+        return json.load(f)
+
+
+@pytest.fixture
+def valid_exam_blueprint_data():
+    """Load valid exam blueprint data for testing."""
+    with open(EXAM_BLUEPRINTS_DIR / "valid_schema_11.json", "r") as f:
+        return json.load(f)

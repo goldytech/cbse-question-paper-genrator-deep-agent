@@ -1,6 +1,6 @@
 ---
 name: question-assembly
-description: Assembles CBSE-compliant questions from Tavily search results. Use when creating final question objects from retrieved educational content.
+description: Assembles CBSE-compliant questions from search results. Use when creating final question objects from retrieved educational content.
 metadata:
   version: "1.0"
   author: CBSE Question Paper Generator
@@ -9,7 +9,9 @@ metadata:
 # Question Assembly Skill
 
 ## Overview
-This skill assembles complete CBSE question objects from Tavily search results and blueprint requirements. It handles question formatting, difficulty assessment, diagram detection, and quality validation.
+This skill assembles complete CBSE question objects from search results and blueprint requirements. It handles question formatting, difficulty assessment, diagram detection, and quality validation.
+
+> **NOTE:** This skill was previously designed to work with Tavily search results. It will be updated for Qdrant vector database results in the next phase.
 
 ## When to Use
 Use this skill when you need to:
@@ -23,16 +25,18 @@ Use this skill when you need to:
 
 You will receive two inputs:
 
-### 1. Search Results (15 items from Tavily)
+### 1. Search Results (from vector database)
 ```json
 [
   {
-    "title": "...",
-    "content": "...",
-    "url": "..."
+    "question_text": "...",
+    "metadata": {...},
+    "similarity_score": 0.95
   }
 ]
 ```
+
+> **NOTE:** Previous version used 15 items from Tavily web search. This will be replaced with Qdrant vector database results.
 
 ### 2. Blueprint Requirements
 ```json

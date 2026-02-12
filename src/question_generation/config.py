@@ -27,7 +27,7 @@ BLUEPRINT_VALIDATOR_SUBAGENT: Dict[str, Any] = {
 # Uses GPT-4o-mini for cost-effective query generation
 QUERY_OPTIMIZER_SUBAGENT: Dict[str, Any] = {
     "name": "query-optimizer",
-    "description": "Generates optimized Tavily search queries for CBSE question retrieval",
+    "description": "Generates optimized search queries for CBSE question retrieval",
     "model": "openai:gpt-4o-mini",
     "tools": [],  # No tools needed - just query generation
     "skills": [f"{SKILL_ROOT}/query-optimizer/"],

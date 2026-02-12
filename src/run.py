@@ -593,8 +593,15 @@ async def main_async():
             console.print("Please set: export OPENAI_API_KEY=your-key")
             sys.exit(1)
 
-        if not os.environ.get("TAVILY_API_KEY"):
-            console.print("[yellow]Warning: TAVILY_API_KEY not set - curriculum search disabled[/]")
+        # =============================================================================
+        # TAVILY API KEY CHECK - DISABLED
+        # =============================================================================
+        # The TAVILY_API_KEY check is no longer needed as Tavily search has been disabled.
+        # Curriculum search will be re-implemented using Qdrant vector database.
+        #
+        # if not os.environ.get("TAVILY_API_KEY"):
+        #     console.print("[yellow]Warning: TAVILY_API_KEY not set - curriculum search disabled[/]")
+        # =============================================================================
 
         print("Creating CBSE Question Paper Generator agent...")
         agent = create_agent()

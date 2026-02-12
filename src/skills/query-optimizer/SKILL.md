@@ -1,6 +1,6 @@
 ---
 name: query-optimization
-description: Generates optimized Tavily search queries for CBSE educational content retrieval. Use when creating search queries to find CBSE question examples from educational websites.
+description: Generates optimized search queries for CBSE educational content retrieval. Use when creating search queries to find CBSE question examples from educational websites.
 metadata:
   version: "1.0"
   author: CBSE Question Paper Generator
@@ -9,7 +9,9 @@ metadata:
 # Query Optimization Skill
 
 ## Overview
-This skill specializes in creating effective Tavily search queries for finding CBSE question examples from educational websites like CBSE Academic, BYJU'S, Vedantu, and Careers360.
+This skill specializes in creating effective search queries for finding CBSE question examples from educational websites.
+
+> **NOTE:** This skill was previously designed for Tavily web search. It will be updated for Qdrant vector database queries in the next phase.
 
 ## When to Use
 Use this skill when you need to:

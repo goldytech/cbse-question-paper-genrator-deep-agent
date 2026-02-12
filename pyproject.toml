@@ -25,7 +25,14 @@ dependencies = [
     "langchain>=1.2.7,<1.3.0",
     "langchain-openai>=0.3.0",
     "langchain-core>=0.3.0",
-    "tavily-python>=0.7.20",
+    # =============================================================================
+    # TAVILY DEPENDENCY - DISABLED
+    # =============================================================================
+    # tavily-python has been commented out as Tavily web search is being replaced
+    # with Qdrant vector database for CBSE question retrieval.
+    # Re-enable when implementing Qdrant integration.
+    # "tavily-python>=0.7.20",
+    # =============================================================================
     "python-dotenv>=1.0.0",
     "pydantic>=2.10.0",
     "rich>=14.3.1",

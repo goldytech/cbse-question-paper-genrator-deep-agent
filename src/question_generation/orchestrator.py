@@ -2,10 +2,12 @@
 
 This tool orchestrates the question paper generation process using:
 - Query optimizer subagent (GPT-4o-mini) for search query generation
-- Tavily search for content retrieval
 - Question assembler subagent (GPT-4o) for question creation
 - Async parallel processing with rate limiting
 - Disk-based caching for performance
+
+NOTE: Tavily search integration has been disabled. Vector database search (Qdrant)
+will be implemented as the replacement search mechanism.
 """
 
 import asyncio
@@ -18,20 +20,35 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 
 from langchain_core.tools import tool
-from tavily import TavilyClient
 
-# Configuration
-TAVILY_CONFIG = {
-    "max_results": 15,
-    "search_depth": "advanced",
-    "include_raw_content": True,
-    "include_domains": [
-        "cbseacademic.nic.in",
-        "byjus.com",
-        "vedantu.com",
-        "learn.careers360.com",
-    ],
-}
+# =============================================================================
+# TAVILY SEARCH INTEGRATION - DISABLED
+# =============================================================================
+# The following code is commented out as Tavily is being replaced with Qdrant
+# vector database for CBSE question retrieval.
+#
+# To re-enable Tavily:
+# 1. Uncomment the import below
+# 2. Uncomment the TAVILY_CONFIG dictionary
+# 3. Uncomment the _get_tavily_client() function
+# 4. Uncomment the _search_tavily() function
+# 5. Re-enable search calls in _generate_single_question()
+#
+# from tavily import TavilyClient
+#
+# # Configuration
+# TAVILY_CONFIG = {
+#     "max_results": 15,
+#     "search_depth": "advanced",
+#     "include_raw_content": True,
+#     "include_domains": [
+#         "cbseacademic.nic.in",
+#         "byjus.com",
+#         "vedantu.com",
+#         "learn.careers360.com",
+#     ],
+# }
+# =============================================================================
 
 RATE_LIMIT_PER_MINUTE = 100
 MAX_CONCURRENT = 15
@@ -52,12 +69,19 @@ class QuestionRequirements:
     cognitive_level: str
 
 
-def _get_tavily_client() -> TavilyClient:
-    """Get or create Tavily client."""
-    api_key = os.environ.get("TAVILY_API_KEY")
-    if not api_key:
-        raise ValueError("TAVILY_API_KEY not set in environment")
-    return TavilyClient(api_key=api_key)
+# =============================================================================
+# TAVILY CLIENT FUNCTION - DISABLED
+# =============================================================================
+# This function was used to create Tavily client instances for search operations.
+# Currently disabled pending Qdrant vector database integration.
+#
+# def _get_tavily_client() -> TavilyClient:
+#     """Get or create Tavily client."""
+#     api_key = os.environ.get("TAVILY_API_KEY")
+#     if not api_key:
+#         raise ValueError("TAVILY_API_KEY not set in environment")
+#     return TavilyClient(api_key=api_key)
+# =============================================================================
 
 
 class QuestionCache:
@@ -202,22 +226,29 @@ async def _optimize_query(requirements: QuestionRequirements) -> str:
     return " ".join(query_parts)
 
 
-async def _search_tavily(query: str) -> List[Dict]:
-    """Search Tavily for question examples."""
-    async with request_semaphore:
-        try:
-            client = _get_tavily_client()
-            results = client.search(
-                query=query,
-                max_results=TAVILY_CONFIG["max_results"],
-                search_depth=TAVILY_CONFIG["search_depth"],
-                include_raw_content=TAVILY_CONFIG["include_raw_content"],
-                include_domains=TAVILY_CONFIG["include_domains"],
-            )
-            return results.get("results", [])
-        except Exception as e:
-            print(f"Tavily search error: {e}")
-            return []
+# =============================================================================
+# TAVILY SEARCH FUNCTION - DISABLED
+# =============================================================================
+# This function performed web searches using Tavily to find CBSE question examples.
+# Currently disabled pending Qdrant vector database integration.
+#
+# async def _search_tavily(query: str) -> List[Dict]:
+#     """Search Tavily for question examples."""
+#     async with request_semaphore:
+#         try:
+#             client = _get_tavily_client()
+#             results = client.search(
+#                 query=query,
+#                 max_results=TAVILY_CONFIG["max_results"],
+#                 search_depth=TAVILY_CONFIG["search_depth"],
+#                 include_raw_content=TAVILY_CONFIG["include_raw_content"],
+#                 include_domains=TAVILY_CONFIG["include_domains"],
+#             )
+#             return results.get("results", [])
+#         except Exception as e:
+#             print(f"Tavily search error: {e}")
+#             return []
+# =============================================================================
 
 
 async def _assemble_question(
@@ -313,13 +344,25 @@ async def _generate_single_question(
     # Generate query
     query = await _optimize_query(requirements)
 
-    # Search Tavily
-    search_results = await _search_tavily(query)
+    # =============================================================================
+    # TAVILY SEARCH CALLS - DISABLED
+    # =============================================================================
+    # The following search code is commented out pending Qdrant vector database integration.
+    # Previously, this function would:
+    # 1. Search Tavily with the optimized query
+    # 2. If no results, retry with a simpler query
+    # 3. Pass search results to _assemble_question()
+    #
+    # search_results = await _search_tavily(query)
+    #
+    # # If no results, try with simpler query
+    # if not search_results:
+    #     simple_query = f"CBSE Class {requirements.class_level} {requirements.subject} {requirements.chapter} {requirements.topic}"
+    #     search_results = await _search_tavily(simple_query)
+    # =============================================================================
 
-    # If no results, try with simpler query
-    if not search_results:
-        simple_query = f"CBSE Class {requirements.class_level} {requirements.subject} {requirements.chapter} {requirements.topic}"
-        search_results = await _search_tavily(simple_query)
+    # TEMPORARY: Empty search results until Qdrant is implemented
+    search_results: List[Dict] = []
 
     # Assemble question
     question = await _assemble_question(search_results, requirements, question_number)
