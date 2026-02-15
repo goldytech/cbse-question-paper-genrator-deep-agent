@@ -12,6 +12,7 @@ from diagram_generation.tool import generate_diagram_tool
 from docx_generation.tool import generate_docx_tool
 from input_file_locator.tool import locate_blueprint_tool
 from cbse_question_retriever.tool import generate_question_tool
+from cbse_question_retriever.llm_question_generator import generate_llm_question_tool
 
 # Skill root path
 SKILL_ROOT = "src/skills"
@@ -36,12 +37,12 @@ BLUEPRINT_VALIDATOR_SUBAGENT: Dict[str, Any] = {
 }
 
 # CBSE Question Retriever Subagent Configuration
-# Step 3: Retrieves questions from vector DB and generates with GPT-4o
+# Step 3: Retrieves questions from vector DB and generates with gpt-5-mini
 CBSE_QUESTION_RETRIEVER_SUBAGENT: Dict[str, Any] = {
     "name": "cbse-question-retriever",
-    "description": "Retrieves CBSE textbook chunks from Qdrant vector database and generates questions using GPT-4o. Auto-detects if diagram is needed.",
-    "model": "openai:gpt-4o",
-    "tools": [generate_question_tool, generate_diagram_tool],
+    "description": "Retrieves CBSE textbook chunks from Qdrant vector database using generate_question_tool, then generates high-quality CBSE-compliant questions using gpt-5-mini via generate_llm_question_tool. Includes detailed prompting with few-shot examples, diagram detection, and pedagogical guidelines.",
+    "model": "openai:gpt-5-mini",
+    "tools": [generate_question_tool, generate_llm_question_tool, generate_diagram_tool],
     "skills": [f"{SKILL_ROOT}/cbse-question-retriever/"],
 }
 

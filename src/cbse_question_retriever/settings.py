@@ -32,6 +32,21 @@ class RetrievalSettings(BaseModel):
     fuzzy_match_threshold: int = Field(default=80, description="Minimum fuzzy match score (0-100)")
 
 
+class LLMSettings(BaseModel):
+    """LLM question generation settings."""
+
+    model: str = Field(default="gpt-5-mini", description="LLM model for question generation")
+    temperature: float = Field(default=0.3, description="Temperature for generation (0.0-1.0)")
+    max_tokens: int = Field(default=1000, description="Maximum tokens for generation")
+    timeout: int = Field(default=30, description="LLM API timeout in seconds")
+    quality_check_enabled: bool = Field(
+        default=True, description="Enable quality self-assessment by LLM"
+    )
+    few_shot_examples_enabled: bool = Field(
+        default=True, description="Include few-shot examples in prompts"
+    )
+
+
 class CBSEQuestionRetrieverSettings(BaseSettings):
     """Main settings class for CBSE Question Retriever."""
 
@@ -42,6 +57,7 @@ class CBSEQuestionRetrieverSettings(BaseSettings):
     qdrant: QdrantSettings = Field(default_factory=QdrantSettings)
     openai: OpenAISettings = Field(default_factory=OpenAISettings)
     retrieval: RetrievalSettings = Field(default_factory=RetrievalSettings)
+    llm: LLMSettings = Field(default_factory=LLMSettings)
 
     # Class-level configuration
     use_mock_data: bool = Field(default=False, description="Use mock data for testing")
