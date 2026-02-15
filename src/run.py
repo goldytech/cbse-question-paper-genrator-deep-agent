@@ -147,56 +147,6 @@ def generate_output_filename(blueprint_path: str, blueprint_data: dict) -> str:
     return f"output/{filename}"
 
 
-def find_blueprint_path(task):
-    """Extract blueprint path from task or discover in input folder.
-
-    Supports two blueprint types:
-    - Master blueprint: input/classes/{class}/{subject}/blueprint.json
-    - Teacher input file: input/classes/{class}/{subject}/input_*.json
-
-    Returns a relative path (e.g., 'input/classes/10/mathematics/blueprint.json') for FilesystemBackend compatibility.
-    """
-    classes_dir = Path("input/classes")
-
-    # First, check if a specific path is provided in the task
-    words = task.split()
-    for word in words:
-        if word.startswith("input/") and word.endswith(".json"):
-            return word
-        if word.startswith("output/") and word.endswith(".json"):
-            return word
-
-    # Auto-discovery in the new folder structure
-    if classes_dir.exists():
-        # Search for all JSON files in the classes directory
-        all_json_files = list(classes_dir.rglob("*.json"))
-
-        if all_json_files:
-            # Priority 1: Look for teacher input files (input_*.json) - these override master blueprints
-            teacher_files = [f for f in all_json_files if f.name.startswith("input_")]
-
-            # Priority 2: Look for master blueprint.json files
-            master_files = [f for f in all_json_files if f.name == "blueprint.json"]
-
-            # Select the most recent file (prefer teacher files, then master files)
-            if teacher_files:
-                latest_file = max(teacher_files, key=lambda f: f.stat().st_mtime)
-            elif master_files:
-                latest_file = max(master_files, key=lambda f: f.stat().st_mtime)
-            else:
-                # Fallback: use any JSON file found
-                latest_file = max(all_json_files, key=lambda f: f.stat().st_mtime)
-
-            return str(latest_file).replace("\\", "/")
-
-    raise FileNotFoundError(
-        "No blueprint file found. Please provide a blueprint path in your task "
-        "or place a blueprint JSON file in the input/classes/{class}/{subject}/ folder. "
-        "Expected structure: input/classes/{class}/{subject}/blueprint.json (master) or "
-        "input/classes/{class}/{subject}/input_*.json (teacher file)"
-    )
-
-
 def display_blueprint_info(blueprint_path):
     """Display blueprint information using Rich."""
     table = Table(title="[bold blue]Blueprint Configuration[/]", show_header=False)
@@ -234,10 +184,16 @@ def handle_blueprint_error(error):
     console.print("• Blueprint files must be [bold].json[/] format")
 
 
-async def run_agent_with_live_display(agent, task, blueprint_path, thread_id="session-1"):
-    """Run agent with real-time live display and HITL interrupt handling."""
+async def run_agent_with_live_display(agent, task, original_prompt, thread_id="session-1"):
+    """Run agent with real-time live display and HITL interrupt handling.
+
+    Args:
+        agent: The DeepAgent instance
+        task: The task description for the agent
+        original_prompt: The original user prompt (for reference)
+        thread_id: Session thread ID
+    """
     from rich.live import Live
-    from deepagents.backends.utils import create_file_data
 
     console_local = Console()
     display = QuestionPaperAgentDisplay()
@@ -249,39 +205,11 @@ async def run_agent_with_live_display(agent, task, blueprint_path, thread_id="se
 
     console_local.print()
     console_local.print("[bold blue]CBSE Question Paper Generator[/]")
-    task_display = task[:80] + "..." if len(task) > 80 else task
+    task_display = original_prompt[:80] + "..." if len(original_prompt) > 80 else original_prompt
     console_local.print(f"[dim]Task: {task_display}[/]")
     console_local.print()
     console_local.print("[dim]Using Live Streaming with Human-in-the-Loop...[/]")
     console_local.print()
-
-    # Normalize path to use forward slashes for FilesystemBackend
-    normalized_path = blueprint_path.replace("\\", "/")
-
-    # Load blueprint file data - FilesystemBackend handles paths
-    files = {}
-    blueprint_data = None
-    try:
-        with open(blueprint_path, "r", encoding="utf-8") as f:
-            content = f.read()
-            # Use a normalized path (forward slashes) for FilesystemBackend
-            files[normalized_path] = create_file_data(content)
-            # Parse blueprint for metadata
-            blueprint_data = json.loads(content)
-        console_local.print(f"[green]✓ Loaded blueprint: {normalized_path}[/]")
-    except Exception as e:
-        console_local.print(f"[red]✗ Failed to load blueprint: {e}[/]")
-        raise
-
-    # Generate a dynamic output filename based on blueprint metadata
-    output_filename = generate_output_filename(blueprint_path, blueprint_data)
-    console_local.print(f"[dim]Will save to: {output_filename}[/]")
-
-    # Update task to use normalized path and include output filename
-    task_with_normalized_path = task.replace(blueprint_path, normalized_path)
-    task_with_normalized_path = task_with_normalized_path.replace(
-        "output/question_paper.json", output_filename
-    )
 
     live_obj = Live(display.spinner, console=console_local, refresh_per_second=10, transient=True)
 
@@ -290,7 +218,7 @@ async def run_agent_with_live_display(agent, task, blueprint_path, thread_id="se
     with live_obj:
         while True:
             async for chunk in agent.astream(
-                {"messages": [("user", task_with_normalized_path)], "files": files},
+                {"messages": [("user", task)]},
                 config=config,
                 stream_mode="values",
             ):
@@ -570,23 +498,22 @@ async def main_async():
         short_task = "Generate a CBSE question paper"
 
     try:
-        blueprint_path = find_blueprint_path(short_task)
-        display_blueprint_info(blueprint_path)
+        # The agent will now delegate to input-file-locator subagent to find the blueprint
+        # No need to pre-locate the file here
 
-        # Generate output filename for reference
-        with open(blueprint_path, "r", encoding="utf-8") as f:
-            blueprint_data = json.load(f)
-        output_filename = generate_output_filename(blueprint_path, blueprint_data)
-        preview_filename = output_filename.replace("output/", "output/preview_")
-
-        task = f"""Generate a CBSE question paper using blueprint {blueprint_path}:
-        1. Read and validate the blueprint from {blueprint_path}
-        2. Generate questions for each section based on blueprint
-        3. Validate the final paper matches blueprint
-        4. Write the paper to: {preview_filename}
+        task = f"""Generate a CBSE question paper based on the following request: {short_task}
+        
+        Follow this workflow:
+        1. Delegate to input-file-locator subagent to locate the blueprint file
+        2. If blueprint found, continue. If not found, report error and terminate.
+        3. Delegate to blueprint-validator subagent to validate the blueprint
+        4. If validation fails, report errors and terminate.
+        5. Generate questions for each section based on blueprint
+        6. Delegate to paper-validator subagent to validate the final paper
+        7. Write the paper to output/preview_{{subject}}_class{{class}}_{{exam}}_{{timestamp}}_{{id}}.json
            (Use "preview_" prefix - this is a staging file for teacher approval)
-        5. Wait for teacher approval. If rejected, make targeted changes and write new preview file.
-        6. Once approved, the system will automatically move it to final location: {output_filename}"""
+        8. Wait for teacher approval. If rejected, make targeted changes and write new preview file.
+        9. Once approved, the system will automatically move it to final location."""
 
         if not os.environ.get("OPENAI_API_KEY"):
             console.print("[red]Error: OPENAI_API_KEY not set in environment[/]")
@@ -608,13 +535,14 @@ async def main_async():
         print("Agent created successfully!")
         print()
 
-        await run_agent_with_live_display(
-            agent, task, blueprint_path, thread_id="cbse-math-paper-session-001"
-        )
+        # Display initial info
+        console.print(f"[dim]Task: {short_task[:80]}{'...' if len(short_task) > 80 else ''}[/]")
+        console.print("[dim]The agent will locate the blueprint file automatically...[/]")
+        console.print()
 
-    except FileNotFoundError as e:
-        handle_blueprint_error(e)
-        sys.exit(1)
+        await run_agent_with_live_display(
+            agent, task, short_task, thread_id="cbse-math-paper-session-001"
+        )
     except KeyboardInterrupt:
         console.print()
         console.print("[yellow]Interrupted by user[/]")

@@ -1,5 +1,5 @@
 ---
-name: query-optimization
+name: query-optimizer
 description: Generates optimized search queries for CBSE educational content retrieval. Use when creating search queries to find CBSE question examples from educational websites.
 metadata:
   version: "1.0"

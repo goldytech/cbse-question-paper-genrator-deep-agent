@@ -10,9 +10,20 @@ from blueprint_validation.tool import validate_blueprint_tool
 from paper_validation.tool import validate_paper_tool
 from diagram_generation.tool import generate_diagram_tool
 from docx_generation.tool import generate_docx_tool
+from input_file_locator.tool import locate_blueprint_tool
 
 # Skill root path
 SKILL_ROOT = "src/skills"
+
+# Input File Locator Subagent Configuration
+# First step: Locates blueprint files from teacher input or auto-discovery
+INPUT_FILE_LOCATOR_SUBAGENT: Dict[str, Any] = {
+    "name": "input-file-locator",
+    "description": "Locates and validates the teacher's input blueprint JSON file from explicit path or auto-discovers from input/classes/{class}/{subject}/ folder",
+    "model": "openai:gpt-4o",
+    "tools": [locate_blueprint_tool],
+    "skills": [f"{SKILL_ROOT}/input-file-locator/"],
+}
 
 # Blueprint Validator Subagent Configuration
 BLUEPRINT_VALIDATOR_SUBAGENT: Dict[str, Any] = {
@@ -63,6 +74,7 @@ DOCX_GENERATOR_SUBAGENT: Dict[str, Any] = {
 
 # List of all subagents for registration
 ALL_SUBAGENTS: List[Dict[str, Any]] = [
+    INPUT_FILE_LOCATOR_SUBAGENT,
     BLUEPRINT_VALIDATOR_SUBAGENT,
     QUERY_OPTIMIZER_SUBAGENT,
     QUESTION_ASSEMBLER_SUBAGENT,
