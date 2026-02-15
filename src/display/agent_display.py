@@ -186,12 +186,6 @@ class QuestionPaperAgentDisplay:
                         console.print(f"  [bold blue]▶ Validating blueprint:[/] {Path(path).name}")
                         self.update_status(f"Validating: {Path(path).name}")
 
-                    # Curriculum Research Progress
-                    elif name == "search_cbse_curriculum_tool":
-                        query = args.get("query", "")
-                        console.print(f"  [bold cyan]▶ Researching:[/] {query[:50]}...")
-                        self.update_status(f"Research: {query[:30]}...")
-
                     # Question Generation Progress
                     elif name == "generate_questions_gpt4o":
                         topic = args.get("topic", "")
@@ -278,22 +272,6 @@ class QuestionPaperAgentDisplay:
                 except Exception:
                     console.print(f"    [red]✗ Validation error[/]")
                     self.update_status("Validation failed")
-
-            # Curriculum Search Results
-            elif name == "search_cbse_curriculum_tool":
-                import json
-
-                try:
-                    result = json.loads(content) if isinstance(content, str) else content
-                    topic_count = len(result.get("topics", []))
-                    if topic_count > 0:
-                        console.print(f"    [green]✓ Found {topic_count} references[/]")
-                        self.update_status(f"Found {topic_count} topics ✓")
-                    else:
-                        console.print(f"    [yellow]⚠ No results found[/]")
-                        self.update_status("No curriculum data")
-                except:
-                    console.print(f"    [yellow]⚠ Search completed[/]")
 
             # Question Generation Results
             elif name == "generate_questions_gpt4o":
