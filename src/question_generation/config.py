@@ -11,6 +11,7 @@ from paper_validation.tool import validate_paper_tool
 from diagram_generation.tool import generate_diagram_tool
 from docx_generation.tool import generate_docx_tool
 from input_file_locator.tool import locate_blueprint_tool
+from cbse_question_retriever.tool import generate_question_tool
 
 # Skill root path
 SKILL_ROOT = "src/skills"
@@ -34,14 +35,14 @@ BLUEPRINT_VALIDATOR_SUBAGENT: Dict[str, Any] = {
     "skills": [f"{SKILL_ROOT}/blueprint-validator/"],
 }
 
-# Query Optimizer Subagent Configuration
-# Uses GPT-4o-mini for cost-effective query generation
-QUERY_OPTIMIZER_SUBAGENT: Dict[str, Any] = {
-    "name": "query-optimizer",
-    "description": "Generates optimized search queries for CBSE question retrieval",
-    "model": "openai:gpt-4o-mini",
-    "tools": [],  # No tools needed - just query generation
-    "skills": [f"{SKILL_ROOT}/query-optimizer/"],
+# CBSE Question Retriever Subagent Configuration
+# Step 3: Retrieves questions from vector DB and generates with GPT-4o
+CBSE_QUESTION_RETRIEVER_SUBAGENT: Dict[str, Any] = {
+    "name": "cbse-question-retriever",
+    "description": "Retrieves CBSE textbook chunks from Qdrant vector database and generates questions using GPT-4o. Auto-detects if diagram is needed.",
+    "model": "openai:gpt-4o",
+    "tools": [generate_question_tool, generate_diagram_tool],
+    "skills": [f"{SKILL_ROOT}/cbse-question-retriever/"],
 }
 
 # Question Assembler Subagent Configuration
@@ -76,7 +77,7 @@ DOCX_GENERATOR_SUBAGENT: Dict[str, Any] = {
 ALL_SUBAGENTS: List[Dict[str, Any]] = [
     INPUT_FILE_LOCATOR_SUBAGENT,
     BLUEPRINT_VALIDATOR_SUBAGENT,
-    QUERY_OPTIMIZER_SUBAGENT,
+    CBSE_QUESTION_RETRIEVER_SUBAGENT,
     QUESTION_ASSEMBLER_SUBAGENT,
     PAPER_VALIDATOR_SUBAGENT,
     DOCX_GENERATOR_SUBAGENT,

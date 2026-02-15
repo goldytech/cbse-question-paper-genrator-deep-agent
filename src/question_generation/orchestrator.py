@@ -1,19 +1,15 @@
 """Question Generator Tool for CBSE Question Paper Generation.
 
-This tool orchestrates the question paper generation process using:
-- Query optimizer subagent (GPT-4o-mini) for search query generation
-- Question assembler subagent (GPT-4o) for question creation
-- Async parallel processing with rate limiting
-- Disk-based caching for performance
+This tool orchestrates the question paper generation process using subagents:
+- cbse-question-retriever: Retrieves CBSE content and generates questions
+- question-assembler: Assembles questions into final format
 
-NOTE: Tavily search integration has been disabled. Vector database search (Qdrant)
-will be implemented as the replacement search mechanism.
+NOTE: This tool is now a wrapper that delegates to the cbse-question-retriever subagent.
+Direct question generation logic will be moved to the subagent.
 """
 
 import asyncio
 import json
-import os
-import sqlite3
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -82,127 +78,6 @@ class QuestionRequirements:
 #         raise ValueError("TAVILY_API_KEY not set in environment")
 #     return TavilyClient(api_key=api_key)
 # =============================================================================
-
-
-class QuestionCache:
-    """SQLite-based cache for questions."""
-
-    def __init__(self, db_path: str = "src/cache/questions/question_cache.db"):
-        self.db_path = db_path
-        Path(db_path).parent.mkdir(parents=True, exist_ok=True)
-        self._init_db()
-
-    def _init_db(self):
-        """Initialize database schema."""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS question_cache (
-                    cache_key TEXT PRIMARY KEY,
-                    blueprint_hash TEXT NOT NULL,
-                    question_data TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    used_count INTEGER DEFAULT 0
-                )
-            """)
-            conn.execute("""
-                CREATE INDEX IF NOT EXISTS idx_blueprint_hash 
-                ON question_cache(blueprint_hash)
-            """)
-
-    def generate_key(self, requirements: QuestionRequirements) -> str:
-        """Generate deterministic cache key."""
-        import hashlib
-
-        key_data = {
-            "class": requirements.class_level,
-            "subject": requirements.subject,
-            "chapter": requirements.chapter,
-            "topic": requirements.topic,
-            "format": requirements.question_format,
-            "marks": requirements.marks,
-            "difficulty": requirements.difficulty,
-            "nature": requirements.nature,
-        }
-        key_str = json.dumps(key_data, sort_keys=True)
-        return hashlib.sha256(key_str.encode()).hexdigest()[:16]
-
-    def get(self, cache_key: str) -> Optional[Dict]:
-        """Retrieve cached question."""
-        with sqlite3.connect(self.db_path) as conn:
-            row = conn.execute(
-                "SELECT question_data FROM question_cache WHERE cache_key = ?", (cache_key,)
-            ).fetchone()
-            if row:
-                conn.execute(
-                    "UPDATE question_cache SET used_count = used_count + 1 WHERE cache_key = ?",
-                    (cache_key,),
-                )
-                conn.commit()
-                return json.loads(row[0])
-        return None
-
-    def set(self, cache_key: str, question: Dict, blueprint_hash: str):
-        """Store question in cache."""
-        with sqlite3.connect(self.db_path) as conn:
-            conn.execute(
-                """
-                INSERT OR REPLACE INTO question_cache 
-                (cache_key, blueprint_hash, question_data)
-                VALUES (?, ?, ?)
-                """,
-                (cache_key, blueprint_hash, json.dumps(question)),
-            )
-            conn.commit()
-
-
-class DiagramStorage:
-    """Manages diagram storage as separate files."""
-
-    def __init__(self, base_dir: str = "src/cache/diagrams"):
-        self.base_dir = Path(base_dir)
-        self.base_dir.mkdir(parents=True, exist_ok=True)
-        self.index_file = self.base_dir / "diagram_index.json"
-
-    def store(self, key: str, svg_content: str, metadata: Dict) -> str:
-        """Store diagram and return file path."""
-        filepath = self.base_dir / f"{key}.svg"
-
-        with open(filepath, "w") as f:
-            f.write(svg_content)
-
-        # Update index
-        index = self._load_index()
-        index[key] = {
-            **metadata,
-            "filepath": str(filepath),
-            "created_at": datetime.now().isoformat(),
-        }
-        self._save_index(index)
-
-        return str(filepath)
-
-    def retrieve(self, key: str) -> Optional[str]:
-        """Retrieve diagram SVG by key."""
-        filepath = self.base_dir / f"{key}.svg"
-        if filepath.exists():
-            with open(filepath, "r") as f:
-                return f.read()
-        return None
-
-    def get_metadata(self, key: str) -> Optional[Dict]:
-        """Retrieve diagram metadata by key."""
-        index = self._load_index()
-        return index.get(key)
-
-    def _load_index(self) -> Dict:
-        if self.index_file.exists():
-            with open(self.index_file, "r") as f:
-                return json.load(f)
-        return {}
-
-    def _save_index(self, index: Dict):
-        with open(self.index_file, "w") as f:
-            json.dump(index, f, indent=2)
 
 
 # Semaphore for rate limiting
@@ -331,45 +206,11 @@ def _get_format_abbreviation(format_str: str) -> str:
 async def _generate_single_question(
     requirements: QuestionRequirements,
     question_number: int,
-    cache: QuestionCache,
-    blueprint_hash: str,
 ) -> Dict:
-    """Generate a single question with caching."""
-    # Check cache
-    cache_key = cache.generate_key(requirements)
-    cached = cache.get(cache_key)
-    if cached:
-        return cached
-
-    # Generate query
-    query = await _optimize_query(requirements)
-
-    # =============================================================================
-    # TAVILY SEARCH CALLS - DISABLED
-    # =============================================================================
-    # The following search code is commented out pending Qdrant vector database integration.
-    # Previously, this function would:
-    # 1. Search Tavily with the optimized query
-    # 2. If no results, retry with a simpler query
-    # 3. Pass search results to _assemble_question()
-    #
-    # search_results = await _search_tavily(query)
-    #
-    # # If no results, try with simpler query
-    # if not search_results:
-    #     simple_query = f"CBSE Class {requirements.class_level} {requirements.subject} {requirements.chapter} {requirements.topic}"
-    #     search_results = await _search_tavily(simple_query)
-    # =============================================================================
-
-    # TEMPORARY: Empty search results until Qdrant is implemented
-    search_results: List[Dict] = []
-
-    # Assemble question
-    question = await _assemble_question(search_results, requirements, question_number)
-
-    # Cache result
-    cache.set(cache_key, question, blueprint_hash)
-
+    """Generate a single question."""
+    # TEMPORARY: This function should delegate to cbse-question-retriever subagent
+    # For now, generate a placeholder question
+    question = await _assemble_question([], requirements, question_number)
     return question
 
 
@@ -400,10 +241,6 @@ def generate_question_paper_tool(
         # Load blueprint
         with open(blueprint_path, "r", encoding="utf-8") as f:
             blueprint = json.load(f)
-
-        # Initialize cache
-        cache = QuestionCache()
-        blueprint_hash = str(hash(json.dumps(blueprint, sort_keys=True)))
 
         # Extract metadata
         metadata = blueprint.get("metadata", {})
@@ -485,9 +322,7 @@ def generate_question_paper_tool(
                 )
 
                 # Generate question
-                question = asyncio.run(
-                    _generate_single_question(requirements, question_counter, cache, blueprint_hash)
-                )
+                question = asyncio.run(_generate_single_question(requirements, question_counter))
 
                 section_questions.append(question)
                 all_questions.append(question)

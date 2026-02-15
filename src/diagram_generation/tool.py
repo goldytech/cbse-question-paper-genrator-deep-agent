@@ -1,17 +1,10 @@
 """Tool for generating mathematical diagrams using drawsvg."""
 
 import os
-import hashlib
 import base64
-import json
 from pathlib import Path
 from typing import Literal, Dict, List, Optional, Any
 from langchain_core.tools import tool
-
-
-# Cache directory for diagram rendering
-DIAGRAM_CACHE_DIR = Path(__file__).parent.parent / "cache" / "diagrams"
-DIAGRAM_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _ensure_drawsvg_installed():
@@ -23,35 +16,6 @@ def _ensure_drawsvg_installed():
     except ImportError:
         print("Warning: drawsvg not installed. Diagrams cannot be generated.")
         return False
-
-
-def _get_cache_key(description: str, diag_type: str, elements: Dict) -> str:
-    """Generate cache key from diagram parameters."""
-    cache_data = {"description": description, "type": diag_type, "elements": elements}
-    cache_str = json.dumps(cache_data, sort_keys=True)
-    return hashlib.sha256(cache_str.encode()).hexdigest()
-
-
-def _get_from_cache(cache_key: str) -> Optional[Dict]:
-    """Retrieve diagram from cache."""
-    cache_file = DIAGRAM_CACHE_DIR / f"{cache_key}.json"
-    if cache_file.exists():
-        try:
-            with open(cache_file, "r") as f:
-                return json.load(f)
-        except Exception:
-            return None
-    return None
-
-
-def _save_to_cache(cache_key: str, diagram_data: Dict):
-    """Save diagram to cache."""
-    cache_file = DIAGRAM_CACHE_DIR / f"{cache_key}.json"
-    try:
-        with open(cache_file, "w") as f:
-            json.dump(diagram_data, f)
-    except Exception as e:
-        print(f"Warning: Failed to save diagram cache: {e}")
 
 
 def _generate_geometric_diagram(description: str, elements: Optional[Dict] = None) -> Optional[str]:
@@ -335,21 +299,18 @@ def generate_diagram_tool(
     diagram_description: str,
     diagram_type: Literal["geometric", "coordinate", "formula", "chart"] = "geometric",
     elements: Optional[Dict[str, Any]] = None,
-    force_regenerate: bool = False,
 ) -> Dict[str, Any]:
     """
     Generate SVG diagram for mathematical questions using drawsvg.
 
-    This tool auto-detects and installs drawsvg if not present. It supports
-    caching to avoid regenerating the same diagram multiple times.
+    This tool auto-detects and installs drawsvg if not present.
 
     Args:
-        diagram_description: Textual description of the diagram for cache and alt-text
+        diagram_description: Textual description of the diagram
         diagram_type: Type of diagram (geometric/coordinate/formula/chart)
         elements: Structured data for diagram construction:
             - For geometric: shape, coordinates, radius
             - For coordinate: coordinates (dict of point->(x,y)), lines
-        force_regenerate: Ignore cache and regenerate
 
     Returns:
         {
@@ -358,7 +319,6 @@ def generate_diagram_tool(
             "diagram_description": str,  # Formatted description
             "diagram_elements": dict,   # Structured elements
             "diagram_type": str,
-            "cache_hit": bool,
             "error": str (if failed)
         }
 
@@ -375,15 +335,6 @@ def generate_diagram_tool(
         )
     """
     elements = elements or {}
-
-    # Check cache first
-    cache_key = _get_cache_key(diagram_description, diagram_type, elements)
-
-    if not force_regenerate:
-        cached = _get_from_cache(cache_key)
-        if cached:
-            cached["cache_hit"] = True
-            return cached
 
     # Generate diagram based on type
     svg_content = None
@@ -413,7 +364,6 @@ def generate_diagram_tool(
             "error": "Diagram generation failed",
             "diagram_type": diagram_type,
             "diagram_description": diagram_description,
-            "cache_hit": False,
         }
 
     # Encode SVG to base64
@@ -441,11 +391,7 @@ def generate_diagram_tool(
         "diagram_description": structured_description,
         "diagram_elements": elements,
         "diagram_type": diagram_type,
-        "cache_hit": False,
     }
-
-    # Save to cache
-    _save_to_cache(cache_key, result)
 
     return result
 
