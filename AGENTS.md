@@ -99,25 +99,48 @@ task(name="blueprint-validator", task="Validate exam blueprint at path: input/cl
 ---
 
 ### 3. cbse-question-retriever
-**Purpose**: Retrieves CBSE textbook chunks from Qdrant vector database and generates questions using GPT-4o  
+**Purpose**: Two-tier question generation: retrieves textbook chunks from Qdrant vector database (Step 1), then generates questions using gpt-5-mini (Step 2)  
 **When to use**: For each question to be generated based on blueprint specifications  
-**Tools**: Qdrant client for vector database queries, GPT-4o for question generation, `generate_diagram_tool` (if diagram needed)
+**Tools**: 
+- `generate_question_tool`: Retrieves chunks from Qdrant using hybrid search (vector + metadata)
+- `generate_llm_question_tool`: Generates questions using gpt-5-mini with few-shot examples
+- `generate_diagram_tool`: Creates diagrams if needed (auto-detected by LLM)
 
 **How to invoke**:
 ```
+Step 1 - Retrieve chunks:
 task(name="cbse-question-retriever", 
-     task="Generate question for: Class=10, Subject=mathematics, Chapter=Polynomials, Topic=Zeros, Format=MCQ, Difficulty=easy, Marks=1")
+     task="Retrieve chunks for: blueprint_path=input/classes/10/mathematics/first.json, section_id=A, question_number=1")
+
+Step 2 - Generate question:
+task(name="cbse-question-retriever",
+     task="Generate question using chunks: {chunks}, blueprint_context: {context}, question_id=MATH-10-POL-MCQ-001")
 ```
 
-**What it does**:
-1. Queries Qdrant vector database using collection naming convention `{subject}_{class}`
-2. Retrieves relevant textbook chunks based on chapter, topic, and requirements
-3. Uses GPT-4o to generate CBSE-compliant question from retrieved chunks
-4. **Auto-detects if diagram is needed** based on question content (geometry, coordinate geometry, trigonometry, statistics)
-5. Calls `generate_diagram_tool` if diagram is required
-6. Returns complete question with all required fields including diagram data
+**Two-Tier Process**:
 
-**Example Return** (without diagram):
+**Tier 1 - Chunk Retrieval (`generate_question_tool`)**:
+1. Reads blueprint and extracts section requirements
+2. Determines collection name: `{subject}_{class}` (e.g., "mathematics_10")
+3. Uses fuzzy matching to align topic with available Qdrant topics
+4. Generates query embedding using text-embedding-3-large
+5. Performs hybrid search: vector similarity + metadata filters (chapter)
+6. Mixes chunks by format: THEORY/WORKED_EXAMPLE/EXERCISE (40/40/20 or custom ratios)
+7. Returns: chunks + metadata + question_id
+
+**Tier 2 - Question Generation (`generate_llm_question_tool`)**:
+1. Takes retrieved chunks and blueprint context
+2. Builds detailed prompt with:
+   - Few-shot examples (MCQ, SHORT, LONG formats)
+   - Bloom's taxonomy cognitive level instructions
+   - CBSE quality standards and pedagogical guidelines
+   - Question nature specifications (NUMERICAL/CONCEPTUAL/etc.)
+3. Calls gpt-5-mini (temperature=0.3) via LangChain
+4. Parses JSON response with validation
+5. Auto-detects diagram need using separate LLM call
+6. Returns: complete question with options, explanation, hints, prerequisites
+
+**Example Return** (MCQ without diagram):
 ```json
 {
   "question_id": "MATH-10-POL-MCQ-001",
@@ -129,35 +152,61 @@ task(name="cbse-question-retriever",
   "options": ["A) 2, 3", "B) 1, 6", "C) -2, -3", "D) -1, -6"],
   "correct_answer": "A",
   "difficulty": "easy",
-  "bloom_level": "understand",
+  "bloom_level": "REMEMBER",
   "nature": "NUMERICAL",
-  "has_diagram": false,
-  "chunks_used": 3
+  "diagram_needed": false,
+  "diagram_description": null,
+  "explanation": "To find zeroes, solve x² - 5x + 6 = 0. Factorizing: (x-2)(x-3) = 0. Therefore, x = 2 or x = 3.",
+  "hints": ["Set the polynomial equal to zero", "Factor the quadratic"],
+  "prerequisites": ["Understanding of polynomial zeros", "Factorization"],
+  "common_mistakes": ["Confusing zeroes with coefficients", "Sign errors"],
+  "quality_score": 0.95,
+  "generation_metadata": {
+    "model": "gpt-5-mini",
+    "temperature": 0.3,
+    "chunks_used": 3,
+    "few_shot_enabled": true,
+    "quality_check_enabled": true
+  },
+  "error": null
 }
 ```
 
-**Example Return** (with diagram):
+**Example Return** (LONG with diagram):
 ```json
 {
-  "question_id": "MATH-10-TRI-SA-001",
-  "question_text": "In triangle ABC with AB=5cm, BC=12cm, angle B=90°, find AC...",
+  "question_id": "MATH-10-TRI-LA-001",
+  "question_text": "In a right-angled triangle ABC, AB = 5 cm, BC = 12 cm, and ∠B = 90°. Find the length of AC and prove it satisfies Pythagoras theorem.",
   "chapter": "Triangles",
   "topic": "Pythagoras Theorem",
-  "question_format": "SHORT",
-  "marks": 3,
-  "difficulty": "medium",
-  "bloom_level": "apply",
-  "nature": "NUMERICAL",
-  "has_diagram": true,
-  "diagram_type": "geometric",
-  "diagram_svg_base64": "...",
-  "diagram_description": "Right-angled triangle ABC...",
-  "chunks_used": 2
+  "question_format": "LONG",
+  "marks": 5,
+  "difficulty": "easy",
+  "bloom_level": "APPLY",
+  "nature": "DERIVATION",
+  "diagram_needed": true,
+  "diagram_description": "Right-angled triangle ABC with right angle at vertex B. Side AB extends vertically (5 cm), side BC extends horizontally (12 cm). Hypotenuse AC connects A to C diagonally.",
+  "explanation": "Given: Right-angled triangle ABC with ∠B = 90°, AB = 5 cm, BC = 12 cm.\nUsing Pythagoras theorem: AC² = AB² + BC²\nAC² = 5² + 12² = 25 + 144 = 169\nAC = √169 = 13 cm.\nVerification: 5² + 12² = 13² → 25 + 144 = 169 ✓",
+  "options": null,
+  "correct_answer": null,
+  "hints": ["Apply Pythagoras theorem: AC² = AB² + BC²", "Calculate square root of sum"],
+  "prerequisites": ["Pythagoras theorem", "Square roots", "Right-angled triangles"],
+  "common_mistakes": ["Adding sides instead of squaring", "Calculation errors"],
+  "quality_score": 0.96,
+  "generation_metadata": {
+    "model": "gpt-5-mini",
+    "temperature": 0.3,
+    "chunks_used": 5,
+    "diagram_type": "geometric"
+  },
+  "error": null
 }
 ```
 
 **Your Action**:
-- Pass the generated question (with or without diagram) to question-assembler for final formatting
+- For each question, first call to retrieve chunks, then call to generate question
+- Pass the complete generated question to question-assembler for final formatting
+- If diagram is needed, the subagent will also call generate_diagram_tool
 
 ---
 
@@ -321,19 +370,56 @@ The blueprint_validator will:
 For each section in the blueprint:
 1. Calculate difficulty distribution: 40% easy, 40% medium, 20% hard
 2. For each question:
-   a. **Call cbse-question-retriever**:
+   a. **Call cbse-question-retriever** (Step 1 - Retrieve chunks):
       ```
       task(name="cbse-question-retriever", 
-           task="Generate question for: Class={class}, Subject={subject}, Chapter={chapter}, Topic={topic}, Format={format}, Difficulty={difficulty}, Marks={marks}")
+           task="Class=10, Subject=Mathematics, Chapter=Real Numbers, Topic=LCM HCF, Format=MCQ, Difficulty=easy, Marks=1")
       ```
    b. **Subagent performs**:
-      - Queries Qdrant vector DB (collection: `{subject}_{class}`)
+      - Queries Qdrant vector DB (collection: `mathematics_10`)
       - Retrieves relevant textbook chunks
       - Uses GPT-4o to generate question based on chunks
       - **Auto-detects if diagram is needed** based on question content
       - Calls `generate_diagram_tool` if diagram is required
    c. **Receive complete question** with all required fields including diagram data
 3. Pass question to question-assembler for final formatting
+
+**Example**:
+
+Question 1:
+```
+task(name="cbse-question-retriever", 
+     task="Generate question for: Class=10, Subject=mathematics, Chapter=Real Numbers, Topic=LCM HCF, Format=MCQ, Difficulty=easy, Marks=1")
+```
+
+**Response**:
+```json
+{
+  "question_id": "MATH-10-REA-MCQ-001",
+  "question_text": "Find the LCM of 12 and 18",
+  "chapter": "Real Numbers",
+  "topic": "LCM HCF",
+  "question_format": "MCQ",
+  "marks": 1,
+  "options": ["A) 36", "B) 72", "C) 6", "D) 24"],
+  "correct_answer": "A",
+  "difficulty": "easy",
+  "bloom_level": "apply",
+  "nature": "NUMERICAL",
+  "has_diagram": false,
+  "chunks_used": 2
+}
+```
+
+### Step 4: Assemble Questions (DELEGATE)
+```
+task(name="question-assembler", 
+     task="Assemble question: {...}, Requirements: Class=10, Chapter=Real Numbers, Format=MCQ, Marks=1")
+```
+
+**Response**: Final formatted question
+
+Repeat for all questions...
 
 ### Step 4: Assemble Questions (DELEGATE)
 ```

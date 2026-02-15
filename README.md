@@ -10,14 +10,18 @@ This system generates high-quality, CBSE-compliant question papers through an in
 
 ### 🤖 Multi-Agent Architecture
 - **Main Agent**: Orchestrates the workflow, coordinates subagents
-- **blueprint-validator**: Validates blueprint structure and constraints
-- **question-researcher**: Searches and rephrases real CBSE question examples, **auto-detects diagram needs**
+- **input-file-locator**: Locates and validates teacher's input blueprint JSON
+- **blueprint-validator**: Validates blueprint against master policy blueprints (two-blueprint validation)
+- **cbse-question-retriever**: **NEW** - Two-tier system: retrieves chunks from Qdrant vector DB, then generates questions using gpt-5-mini
+- **question-assembler**: Assembles and formats final questions
 - **paper-validator**: Validates final paper against blueprint
-- **docx-generator**: **NEW** - Generates professional DOCX documents with embedded images
+- **docx-generator**: Generates professional DOCX documents with embedded images
 
 ### 🎯 Intelligent Question Generation
-- Searches real CBSE questions online <!-- using Tavily -->
-- Rephrases questions to create unique variants while preserving concepts
+- **Retrieves content from Qdrant vector database**: Stores CBSE textbook chunks with embeddings (text-embedding-3-large)
+- **Generates questions using gpt-5-mini**: Detailed prompting with few-shot examples, Bloom's taxonomy, and CBSE standards
+- **Hybrid search**: Combines vector similarity with metadata filters (chapter, topic)
+- **Fuzzy topic matching**: Handles variations in topic names using rapidfuzz
 - Maintains CBSE difficulty distribution (40% easy, 40% medium, 20% hard)
 - Follows official CBSE question formats and standards
 - **🎨 Auto-generates diagrams** for geometry, coordinate geometry, trigonometry, and statistics questions
@@ -59,26 +63,30 @@ This system generates high-quality, CBSE-compliant question papers through an in
 │  • Compiles final paper                                     │
 └──────────────────────┬──────────────────────────────────────┘
                         │
-        ┌───────────────┼───────────────┐
-        │               │               │
-┌──────▼──────┐ ┌──────▼──────┐ ┌──────▼──────┐ ┌─────▼──────┐
-│  Blueprint  │ │   Question  │ │    Paper    │ │    DOCX      │
-│  Validator  │ │  Researcher │ │  Validator  │ │  Generator   │
-│  Subagent   │ │  Subagent   │ │  Subagent   │ │  Subagent   │
-└─────────────┘ └─────────────┘ └─────────────┘ └──────────────┘
-        │               │
-        └───────────────┼───────────────┘
+    ┌───────────────────┼───────────────────┐
+    │                   │                   │
+┌───▼────┐ ┌───────────▼────────┐ ┌───────▼───────┐ ┌────▼──────┐
+│ Input  │ │  Blueprint         │ │    Paper      │ │   DOCX    │
+│ File   │ │  Validator         │ │   Validator   │ │ Generator │
+│Locator │ │  Subagent          │ │   Subagent    │ │ Subagent  │
+└────────┘ └────────────────────┘ └───────────────┘ └───────────┘
+                        │
+            ┌───────────▼───────────┐
+            │  CBSE Question        │
+            │  Retriever Subagent   │
+            │  (Two-Tier System)    │
+            └───────────┬───────────┘
                         │
         ┌───────────────┴───────────────┐
-        │         Skills System         │
-        └───────────────┬───────────────┘
-                        │
-         ┌──────────────┼──────────────┐
-         │              │              │
-┌───────▼──────┐ ┌────▼─────┐ ┌──────▼──────┐
-│   Class 10   │ │  Common  │ │  References │
-│ Mathematics  │ │ Standards│ │  & Scripts  │
-└──────────────┘ └──────────┘ └─────────────┘
+        │                               │
+┌───────▼────────┐          ┌──────────▼──────────┐
+│  Retrieval     │          │   Generation        │
+│  (Qdrant DB)   │          │   (gpt-5-mini)      │
+│                │          │                     │
+│ • Vector Search│          │ • Few-shot Prompts  │
+│ • Hybrid Query │          │ • Diagram Detection │
+│ • Chunk Mixing │          │ • Quality Check     │
+└────────────────┘          └─────────────────────┘
 ```
 
 ## Workflow
@@ -88,33 +96,53 @@ This system generates high-quality, CBSE-compliant question papers through an in
 ```
 1. Teacher Input
    ↓
-2. Load & Validate Blueprint (blueprint-validator subagent)
+2. Locate Blueprint (input-file-locator subagent)
+   └─ Auto-discovers from input/classes/{class}/{subject}/
+   └─ Returns: file_path, class, subject
    ↓
-3. For Each Question Needed:
-    a. Delegate to question-researcher subagent
-    b. Search 5 CBSE examples online
-    c. Pick best 1 and rephrase
-    d. Auto-detect if diagram needed (geometry, coordinates, etc.)
-    e. If needed: Generate diagram using generate_diagram_tool
-       - Creates SVG with drawsvg
-       - Stores base64 for JSON portability
-       - Adds structured diagram description
-    f. Generate final question (with diagram data if applicable)
+3. Validate Blueprint (blueprint-validator subagent)
+   └─ Two-blueprint validation: exam + master policy
+   └─ Checks: schema, formats, internal choice, syllabus scope
+   ↓
+4. For Each Question Needed:
+    
+    TIER 1 - RETRIEVE CHUNKS (generate_question_tool):
+    a. Query Qdrant vector database
+       └─ Collection: {subject}_{class} (e.g., "mathematics_10")
+       └─ Hybrid search: vector similarity + metadata filters
+       └─ Fuzzy topic matching with rapidfuzz
+       └─ Returns: 10 chunks (THEORY/WORKED_EXAMPLE/EXERCISE)
+    
+    TIER 2 - GENERATE QUESTION (generate_llm_question_tool):
+    b. Build detailed prompt with:
+       └─ Few-shot examples (MCQ, SHORT, LONG formats)
+       └─ Bloom's taxonomy cognitive level instructions
+       └─ CBSE quality standards and pedagogical guidelines
+    c. Call gpt-5-mini (temperature=0.3) via LangChain
+    d. Parse JSON response with validation
+    e. Detect diagram need using LLM
+    f. If needed: Generate diagram using generate_diagram_tool
+       └─ Creates SVG with drawsvg
+       └─ Stores base64 for JSON portability
+       └─ Adds structured diagram description
+    g. Return complete question with:
+       └─ Options, correct_answer, explanation, hints
+       └─ Prerequisites, common_mistakes, quality_score
     ↓
-4. Compile Paper
+5. Compile Paper
    ↓
-5. Validate Paper (paper-validator subagent)
+6. Validate Paper (paper-validator subagent)
    ↓
-6. HITL: Show Formatted Preview to Teacher (with diagram descriptions)
+7. HITL: Show Formatted Preview to Teacher (with diagram descriptions)
    ↓
-7. Teacher Decision:
+8. Teacher Decision:
     ├─ YES → Generate DOCX (docx-generator subagent)
     │    ├─ Convert SVG → PNG (cairosvg)
     │    ├─ Embed images in DOCX (python-docx)
     │    └─ Save to output/docx/
-    └─ NO  → Capture feedback → Go to step 3 (rework)
+    └─ NO  → Capture feedback → Go to step 4 (rework)
     ↓
-8. Complete
+9. Complete
 ```
 
 ### Human-in-the-Loop (HITL) Details
@@ -178,11 +206,15 @@ When the question paper is ready:
 - Python 3.11 or later
 - uv package manager (recommended)
 - OpenAI API key
-- Tavily AI key (optional, for curriculum search)
+- Qdrant vector database (running locally or accessible endpoint)
 - **All Python package dependencies are pre-installed** (no subprocess installation needed)
+  - `qdrant-client>=1.12.0` - For vector database operations
+  - `rapidfuzz>=3.0.0` - For fuzzy topic matching
+  - `pydantic-settings>=2.0.0` - For configuration management
   - `drawsvg>=2.4.1` - For diagram generation
   - `cairosvg>=2.7.0` - For SVG to PNG conversion
   - `python-docx>=1.2.0` - For DOCX export
+  - `langchain-openai>=0.3.0` - For gpt-5-mini integration
 
 ### Step 1: Clone Repository
 ```bash
@@ -486,10 +518,19 @@ question-paper-generator-agent/
 ### Environment Variables
 
 Required:
-- `OPENAI_API_KEY`: OpenAI API key for GPT-4o
+- `OPENAI_API_KEY`: OpenAI API key for GPT-4o and gpt-5-mini
 
-Optional:
-- `TAVILY_API_KEY`: Tavily AI key for curriculum search (disabled if not set)
+Qdrant Configuration:
+- `QDRANT__HOST`: Qdrant server host (default: "127.0.0.1")
+- `QDRANT__HTTP_PORT`: Qdrant HTTP port (default: 6333)
+- `QDRANT__API_KEY`: Qdrant API key (optional, for cloud instances)
+
+LLM Generation Settings (optional):
+- `OPENAI__MODEL`: LLM model for question generation (default: "gpt-5-mini")
+- `OPENAI__TEMPERATURE`: Temperature for generation (default: 0.3)
+- `OPENAI__MAX_TOKENS`: Max tokens for generation (default: 1000)
+- `OPENAI__QUALITY_CHECK_ENABLED`: Enable quality self-assessment (default: true)
+- `OPENAI__FEW_SHOT_EXAMPLES_ENABLED`: Include few-shot examples (default: true)
 
 ### HITL Configuration
 
@@ -562,18 +603,31 @@ export OPENAI_API_KEY=sk-xxxx
 ```
 
 ### "No blueprint file found"
-- Ensure `.json` file exists in `input/` folder
-- Or specify path explicitly: `python run.py "using input/my_blueprint.json"`
+- Ensure `.json` file exists in `input/classes/{class}/{subject}/` folder
+- Or specify path explicitly: `python run.py "Generate paper from input/classes/10/mathematics/blueprint.json"`
 
 ### "Blueprint validation failed"
 - Check JSON syntax
-- Verify required fields: `exam_metadata`, `list_scope`, `sections`
+- Verify required fields: `metadata`, `syllabus_scope`, `sections`
 - Ensure marks calculation is correct
+- Check that all topics are present under each chapter
 
-### "Blueprint validation failed"
-- Check JSON syntax
-- Verify required fields: `exam_metadata`, `syllabus_scope`, `sections`
-- Ensure marks calculation is correct
+### "Qdrant vector DB not accessible"
+- Verify Qdrant is running: `docker ps | grep qdrant`
+- Check QDRANT__HOST and QDRANT__HTTP_PORT settings
+- Ensure collection exists: `curl http://localhost:6333/collections`
+- For Docker: Check port mapping (e.g., 62677->6333)
+
+### "Collection 'mathematics_10' not found"
+- Ensure textbook data is ingested into Qdrant
+- Verify collection naming: `{subject}_{class}` (e.g., "mathematics_10")
+- Check cbse-rag project for data ingestion scripts
+
+### "No textbook content found for {chapter}/{topic}"
+- Verify topic exists in Qdrant collection
+- Check if topic name matches (case-sensitive in metadata)
+- Try fuzzy matching with different topic phrasing
+- Ensure syllabus_scope in blueprint matches Qdrant topics
 
 ### "HITL not stopping for approval"
 - Check that `interrupt_on` is configured in `create_agent()`
@@ -589,6 +643,11 @@ export OPENAI_API_KEY=sk-xxxx
 - Verify cairosvg installation (requires external dependencies)
 - Check for SVG conversion errors in logs
 - Ensure JSON paper has valid structure
+
+### "LLM question generation timeout"
+- Increase OPENAI__TIMEOUT setting (default: 30 seconds)
+- Reduce OPENAI__MAX_TOKENS if generation is too slow
+- Check OpenAI API status and rate limits
 
 ## Development
 
