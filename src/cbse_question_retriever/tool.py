@@ -1,39 +1,127 @@
 """CBSE Question Retriever tool.
 
-This tool retrieves CBSE textbook chunks from Qdrant vector database and generates questions.
+This tool retrieves CBSE textbook chunks from Qdrant vector database based on blueprint specifications.
 """
 
-from typing import Dict, Any, Optional
+import logging
+from typing import Any, Dict
+
 from langchain_core.tools import tool
+
+from cbse_question_retriever.retriever import retriever
+from cbse_question_retriever.data_types import RetrievedData
+
+logger = logging.getLogger(__name__)
 
 
 @tool
 def generate_question_tool(
-    class_level: int,
-    subject: str,
-    chapter: str,
-    topic: str,
-    question_format: str,
-    difficulty: str,
-    marks: int,
+    blueprint_path: str,
+    section_id: str,
+    question_number: int,
 ) -> Dict[str, Any]:
-    """
-    Generates a CBSE-compliant question using vector database retrieval and GPT-4o.
+    """Generates a CBSE-compliant question by retrieving textbook chunks from Qdrant.
 
-    Queries Qdrant vector database for relevant textbook chunks and uses GPT-4o
-    to generate questions. Auto-detects if diagram is needed based on question content.
+    This tool reads the blueprint specification and retrieves relevant textbook content
+    from the Qdrant vector database for question generation.
 
     Args:
-        class_level: CBSE class number (1-12)
-        subject: Subject name (e.g., "mathematics", "science")
-        chapter: Chapter name (e.g., "Polynomials", "Real Numbers")
-        topic: Specific topic within chapter
-        question_format: Question format (MCQ, VSA, SA, LA, Case Study)
-        difficulty: Difficulty level (easy, medium, hard)
-        marks: Marks allocated for the question
+        blueprint_path: Path to the exam blueprint JSON file (e.g., "input/classes/10/mathematics/input_first_term.json")
+        section_id: Section identifier from blueprint (e.g., "A", "B", "C", "D")
+        question_number: Question number within the section (1-based index)
 
     Returns:
-        Complete question with all fields including diagram data if needed
+        Dictionary containing:
+        - question_id: Formatted ID (e.g., "MATH-10-POL-MCQ-001")
+        - chapter: Chapter name
+        - topic: Topic name (fuzzy matched)
+        - question_format: Format from blueprint (MCQ, VERY_SHORT, SHORT, LONG, CASE_STUDY)
+        - marks: Marks per question
+        - difficulty: Calculated difficulty (easy/medium/hard based on 40/40/20 distribution)
+        - bloom_level: Cognitive level (REMEMBER, UNDERSTAND, APPLY, ANALYSE, EVALUATE)
+        - nature: Question nature (NUMERICAL, CONCEPTUAL, REASONING, WORD_PROBLEM, DERIVATION)
+        - has_diagram: Whether question needs diagram (set to False, detected later)
+        - chunks_used: Number of chunks retrieved
+        - chunks: List of retrieved textbook chunks with metadata
+        - blueprint_reference: Section metadata from blueprint
+        - retrieval_metadata: Technical details about the retrieval process
+        - error: Error message if retrieval failed, otherwise None
+
+    Example:
+        >>> result = generate_question_tool(
+        ...     blueprint_path="input/classes/10/mathematics/input_first_term.json",
+        ...     section_id="A",
+        ...     question_number=1
+        ... )
+        >>> print(result["question_id"])
+        "MATH-10-POL-MCQ-001"
+
+    Error Handling:
+        Returns error field with specific messages:
+        - "Collection '{name}' not found"
+        - "Topic '{topic}' not found"
+        - "Blueprint file not found"
+        - "Section '{id}' not found in blueprint"
     """
-    # TODO: Implement question generation logic
-    pass
+    try:
+        logger.info(
+            f"Retrieving question from blueprint: {blueprint_path}, "
+            f"section: {section_id}, question: {question_number}"
+        )
+
+        # Call the retriever
+        result: RetrievedData = retriever.retrieve(
+            blueprint_path=blueprint_path,
+            section_id=section_id,
+            question_number=question_number,
+        )
+
+        # Convert RetrievedData to dictionary
+        return {
+            "question_id": result.question_id,
+            "chapter": result.chapter,
+            "topic": result.topic,
+            "question_format": result.question_format,
+            "marks": result.marks,
+            "difficulty": result.difficulty,
+            "bloom_level": result.bloom_level,
+            "nature": result.nature,
+            "has_diagram": result.has_diagram,
+            "chunks_used": result.chunks_used,
+            "chunks": [
+                {
+                    "id": chunk.id,
+                    "text": chunk.text,
+                    "chapter": chunk.chapter,
+                    "section": chunk.section,
+                    "topic": chunk.topic,
+                    "chunk_type": chunk.chunk_type.value,
+                    "page_start": chunk.page_start,
+                    "page_end": chunk.page_end,
+                    "score": chunk.score,
+                }
+                for chunk in result.chunks
+            ],
+            "blueprint_reference": result.blueprint_reference,
+            "retrieval_metadata": result.retrieval_metadata,
+            "error": result.error,
+        }
+
+    except Exception as e:
+        logger.exception("Unexpected error in generate_question_tool")
+        return {
+            "question_id": "",
+            "chapter": "",
+            "topic": "",
+            "question_format": "MCQ",
+            "marks": 0,
+            "difficulty": "",
+            "bloom_level": "",
+            "nature": "",
+            "has_diagram": False,
+            "chunks_used": 0,
+            "chunks": [],
+            "blueprint_reference": {},
+            "retrieval_metadata": {},
+            "error": f"Tool execution error: {str(e)}",
+        }
