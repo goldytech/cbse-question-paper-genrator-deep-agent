@@ -12,11 +12,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from question_generation.orchestrator import (
-    QuestionRequirements,
-    QuestionCache,
-    DiagramStorage,
-)
+from question_generation.orchestrator import QuestionRequirements
 
 
 @pytest.fixture
@@ -104,65 +100,6 @@ def sample_requirements_hard():
         nature="WORD_PROBLEM",
         cognitive_level="APPLY",
     )
-
-
-# =============================================================================
-# TAVILY TEST FIXTURES - DISABLED
-# =============================================================================
-# These fixtures were used for testing Tavily search functionality.
-# They are commented out pending Qdrant vector database integration.
-#
-# @pytest.fixture
-# def sample_tavily_results():
-#     """Return sample Tavily search results."""
-#     return [
-#         {
-#             "title": f"CBSE Question {i}",
-#             "content": f"Sample question content about polynomials {i}. Find the zeros of x² - 5x + 6.",
-#             "url": f"https://example.com/question-{i}",
-#         }
-#         for i in range(15)
-#     ]
-#
-#
-# @pytest.fixture
-# def mock_tavily_client():
-#     """Mock Tavily client for testing."""
-#     with patch("question_generation.orchestrator._get_tavily_client") as mock:
-#         client = Mock()
-#         client.search.return_value = {
-#             "results": [
-#                 {
-#                     "title": f"Result {i}",
-#                     "content": f"Content {i}",
-#                     "url": f"http://test{i}.com",
-#                 }
-#                 for i in range(15)
-#             ]
-#         }
-#         mock.return_value = client
-#         yield client
-# =============================================================================
-
-
-@pytest.fixture
-def temp_cache_dir(tmp_path):
-    """Provide temporary cache directory."""
-    return tmp_path / "cache"
-
-
-@pytest.fixture
-def question_cache(temp_cache_dir):
-    """Provide QuestionCache instance with temp directory."""
-    db_path = temp_cache_dir / "test_cache.db"
-    return QuestionCache(str(db_path))
-
-
-@pytest.fixture
-def diagram_storage(temp_cache_dir):
-    """Provide DiagramStorage instance with temp directory."""
-    diagrams_dir = temp_cache_dir / "diagrams"
-    return DiagramStorage(str(diagrams_dir))
 
 
 @pytest.fixture
