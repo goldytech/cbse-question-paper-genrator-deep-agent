@@ -35,6 +35,7 @@ class QdrantManager:
                 port=settings.qdrant.http_port,
                 api_key=settings.qdrant.api_key,
                 timeout=settings.qdrant.timeout,
+                https=False,  # Use HTTP for local development
             )
             self._connected = True
             logger.info(
@@ -91,15 +92,17 @@ class QdrantManager:
                     must_conditions.append(FieldCondition(key=key, match=MatchValue(value=value)))
                 query_filter = Filter(must=must_conditions)
 
-            # Perform vector search
-            results = self.client.search(
+            # Perform vector search (using query_points for newer Qdrant client versions)
+            from qdrant_client.http.models import SearchRequest
+
+            results = self.client.query_points(
                 collection_name=collection_name,
-                query_vector=query_vector,
+                query=query_vector,
                 query_filter=query_filter,
                 limit=limit,
                 with_payload=True,
                 with_vectors=False,
-            )
+            ).points
 
             # Convert to Chunk objects
             chunks = []

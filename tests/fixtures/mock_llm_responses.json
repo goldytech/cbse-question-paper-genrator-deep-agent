@@ -1,0 +1,721 @@
+{
+  "metadata": {
+    "total_responses": 23,
+    "format": "mock_llm_responses_v1"
+  },
+  "responses": {
+    "MATH-10-REA-MCQ-001": {
+      "question_text": "Which of the following is the correct prime factorisation of 360 (expressed as product of powers of primes)?",
+      "options": [
+        "A) 2^3 \u00d7 3^2 \u00d7 5",
+        "B) 2^2 \u00d7 3^2 \u00d7 5",
+        "C) 2^3 \u00d7 3 \u00d7 5^2",
+        "D) 2^4 \u00d7 3^2 \u00d7 5"
+      ],
+      "correct_answer": "A",
+      "explanation": "Factorise 360 by dividing by the smallest prime repeatedly:\n360 \u00f7 2 = 180\n180 \u00f7 2 = 90\n90 \u00f7 2 = 45 (so we have three 2's \u2192 2^3)\n45 \u00f7 3 = 15\n15 \u00f7 3 = 5 (two 3's \u2192 3^2)\nRemaining factor is 5.\nHence 360 = 2 \u00d7 2 \u00d7 2 \u00d7 3 \u00d7 3 \u00d7 5 = 2^3 \u00d7 3^2 \u00d7 5, which is option A.\nWhy the others are wrong:\nB) 2^2 \u00d7 3^2 \u00d7 5 = 4 \u00d7 9 \u00d7 5 = 180, not 360 (one 2 is missing).\nC) 2^3 \u00d7 3 \u00d7 5^2 = 8 \u00d7 3 \u00d7 25 = 600, not 360 (exponents of 3 and 5 incorrect).\nD) 2^4 \u00d7 3^2 \u00d7 5 = 16 \u00d7 9 \u00d7 5 = 720, not 360 (one extra 2). \nBy the Fundamental Theorem of Arithmetic, the prime factorisation (up to order) is unique, so A is the only correct representation.",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Divide 360 repeatedly by the smallest prime (start with 2) until you reach 1.",
+        "Count how many times each prime divides 360 to get the exponents."
+      ],
+      "prerequisites": [
+        "Knowledge of prime numbers (2, 3, 5, 7, ...)",
+        "Ability to perform repeated division and multiplication",
+        "Understanding that prime factorisation is unique (Fundamental Theorem of Arithmetic)"
+      ],
+      "common_mistakes": [
+        "Stopping factorisation too early (not factoring the remaining composite factor).",
+        "Miscounting the number of times a prime divides the number (wrong exponents).",
+        "Confusing 1 or composite numbers as primes when listing factors."
+      ],
+      "quality_score": 0.95,
+      "question_id": "MATH-10-REA-MCQ-001",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 8,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-POL-MCQ-002": {
+      "question_text": "Which of the following correctly states the geometrical meaning of a zero of a polynomial p(x)?",
+      "options": [
+        "A) The x-coordinate of a point where the graph of y = p(x) intersects the x-axis.",
+        "B) The y-coordinate of a point where the graph of y = p(x) intersects the y-axis.",
+        "C) The slope of the graph y = p(x) at x = 0.",
+        "D) The x-coordinate of a point where the graph of y = p(x) is maximum or minimum."
+      ],
+      "correct_answer": "A",
+      "explanation": "A real number k is a zero of p(x) if p(k) = 0. On the graph y = p(x), the point corresponding to x = k is (k, p(k)) = (k, 0). Hence k is the x-coordinate of a point where the graph meets the x-axis. Options B, C and D are incorrect: B describes the y-intercept (occuring when x = 0), C refers to the slope (derivative) at x = 0 which is unrelated to zeros in general, and D describes extrema (maxima/minima), which need not satisfy p(x) = 0.",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Remember: k is a zero of p(x) exactly when p(k) = 0.",
+        "On the graph y = p(x), replace p(k) by 0 to find the corresponding point (k, 0)."
+      ],
+      "prerequisites": [
+        "Definition of a zero/root of a polynomial (p(k) = 0).",
+        "Basic understanding of Cartesian coordinates and graphing (x- and y-axes)."
+      ],
+      "common_mistakes": [
+        "Confusing zero of the polynomial with y-intercept (value at x = 0).",
+        "Thinking a zero is the y-coordinate instead of the x-coordinate of the x-axis intersection."
+      ],
+      "quality_score": 0.98,
+      "question_id": "MATH-10-POL-MCQ-002",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 10,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-LIN-MCQ-003": {
+      "question_text": "Consider the pair of linear equations 2x + 3y - 6 = 0 and 4x + 6y - 12 = 0. Using the graphical method criteria, what is the nature of the pair?",
+      "options": [
+        "A) The lines intersect in a single point (unique solution)",
+        "B) The lines are coincident (infinitely many solutions)",
+        "C) The lines are parallel (no solution)",
+        "D) Cannot be determined from the given information"
+      ],
+      "correct_answer": "B",
+      "explanation": "Compare the ratios of coefficients for the two equations written as a1x + b1y + c1 = 0 and a2x + b2y + c2 = 0.\nHere a1/a2 = 2/4 = 1/2, b1/b2 = 3/6 = 1/2, c1/c2 = (\u22126)/(\u221212) = 1/2. Since a1/a2 = b1/b2 = c1/c2, the two lines are coincident, so the pair has infinitely many solutions. \nWhy the other options are wrong:\n- A is wrong because for intersecting lines a1/a2 \u2260 b1/b2.\n- C is wrong because for parallel lines a1/a2 = b1/b2 but a1/a2 \u2260 c1/c2; here c ratios also match.\n- D is wrong because the ratios of coefficients give a definite classification.",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Write each equation in the form a x + b y + c = 0 and compute a1/a2, b1/b2 and c1/c2.",
+        "If all three ratios are equal, the lines are coincident (infinitely many solutions)."
+      ],
+      "prerequisites": [
+        "Form of a linear equation in two variables: ax + by + c = 0",
+        "Knowledge of ratio conditions for intersecting, parallel and coincident lines"
+      ],
+      "common_mistakes": [
+        "Forgetting to include the constant term c when comparing ratios",
+        "Sign errors when computing c1/c2 (negatives)",
+        "Confusing parallel (no solution) with coincident (infinitely many solutions) when a1/a2 = b1/b2"
+      ],
+      "quality_score": 0.95,
+      "question_id": "MATH-10-LIN-MCQ-003",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 9,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-REA-MCQ-004": {
+      "question_text": "Find the prime factorisation (expressed as product of powers of primes in ascending order) of 2310.",
+      "options": [
+        "A) 2310 = 2 \u00d7 3 \u00d7 5 \u00d7 7 \u00d7 11",
+        "B) 2310 = 2 \u00d7 3 \u00d7 5 \u00d7 11 \u00d7 13",
+        "C) 2310 = 2 \u00d7 3^2 \u00d7 5 \u00d7 7",
+        "D) 2310 = 2 \u00d7 5 \u00d7 7 \u00d7 33"
+      ],
+      "correct_answer": "A",
+      "explanation": "Divide 2310 by the smallest primes successively: 2310 \u00f7 2 = 1155, 1155 \u00f7 3 = 385, 385 \u00f7 5 = 77, 77 \u00f7 7 = 11, 11 \u00f7 11 = 1. Thus the prime factors are 2, 3, 5, 7 and 11. Writing as product of powers (and in ascending order) gives 2310 = 2 \u00d7 3 \u00d7 5 \u00d7 7 \u00d7 11.\n\nWhy the others are wrong:\nB) Replaces 7 by 13; 2\u00d73\u00d75\u00d711\u00d713 = 4290, not 2310.\nC) Uses 3^2 (i.e. 9) instead of 3; 2\u00d73^2\u00d75\u00d77 = 2\u00d79\u00d75\u00d77 = 630, not 2310.\nD) Although 2\u00d75\u00d77\u00d733 = 2310 numerically, 33 is composite (33 = 3\u00d711). The question asks for prime factorisation (product of primes), so representing with a composite factor is not a correct prime factorisation. The unique prime factorisation is A.",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Use repeated division by the smallest prime numbers (2, 3, 5, 7, ...).",
+        "Stop when the quotient becomes 1; then write all prime divisors in ascending order.",
+        "If a prime repeats, combine repeats as a power (for example, 2\u00d72\u00d72 = 2^3)."
+      ],
+      "prerequisites": [
+        "Definition of prime and composite numbers",
+        "Technique of dividing by small primes to factorise a number",
+        "Understanding product of powers notation for repeated prime factors"
+      ],
+      "common_mistakes": [
+        "Including a composite factor (like 33) instead of breaking it into primes",
+        "Using incorrect exponents for repeated primes (e.g., 3^2 instead of 3)",
+        "Replacing a correct prime with another prime (typo or misdivision) leading to wrong product"
+      ],
+      "quality_score": 0.96,
+      "question_id": "MATH-10-REA-MCQ-004",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 8,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-POL-MCQ-005": {
+      "question_text": "The graph of a cubic polynomial y = p(x) intersects the x-axis at x = -1 and is tangent to the x-axis at x = 2. Which of the following polynomials (up to a non-zero constant factor) could be p(x)?",
+      "options": [
+        "A) (x + 1)(x - 2)^2",
+        "B) (x + 1)^2(x - 2)",
+        "C) (x - 2)(x + 1)(x + 3)",
+        "D) (x - 2)^3"
+      ],
+      "correct_answer": "A",
+      "explanation": "A zero of p(x) is an x-coordinate where the graph meets the x-axis. If the graph crosses the x-axis at a zero, that zero has odd multiplicity (typically 1). If the graph is tangent to the x-axis at a zero, that zero has even multiplicity (typically 2).\n\nThe graph intersects (crosses) the x-axis at x = -1, so factor (x + 1) must appear with odd multiplicity (1). The graph is tangent at x = 2, so factor (x - 2) must appear with even multiplicity (2). Thus the polynomial (up to a constant factor) must be (x + 1)(x - 2)^2, which is option A.\n\nWhy the others are wrong:\n- B: (x + 1)^2(x - 2) has (x + 1) of multiplicity 2 (tangent at -1) and (x - 2) of multiplicity 1 (crossing at 2), opposite to the given behaviour.\n- C: (x - 2)(x + 1)(x + 3) has simple factors only, so the graph would cross at x = -1 and x = 2 (not be tangent at x = 2); also it introduces an extra zero at x = -3.\n- D: (x - 2)^3 has only x = 2 as a zero (multiplicity 3), so there is no zero at x = -1 as required.",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Remember: zeros are x-values where p(x) = 0 (x-intercepts).",
+        "Even multiplicity of a factor makes the graph touch (be tangent to) the x-axis; odd multiplicity makes it cross.",
+        "Choose factors (x + 1) and (x - 2) with multiplicities matching the described behaviour."
+      ],
+      "prerequisites": [
+        "Definition of zero of a polynomial (p(k) = 0)",
+        "Factor (x - a) corresponds to zero at x = a",
+        "Effect of factor multiplicity on whether graph crosses or is tangent to the x-axis"
+      ],
+      "common_mistakes": [
+        "Assuming tangency means multiplicity 1 (mixing up touch vs cross)",
+        "Forgetting that a constant multiple does not change zeros",
+        "Selecting a polynomial that introduces extra zeros not described in the graph"
+      ],
+      "quality_score": 0.96,
+      "question_id": "MATH-10-POL-MCQ-005",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 10,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-LIN-MCQ-006": {
+      "question_text": "For the pair of linear equations 4x + 6y - 8 = 0 and 2x + 3y - 5 = 0, the lines representing them are:",
+      "options": [
+        "A) Coincident lines (infinitely many solutions)",
+        "B) Parallel lines (no solution)",
+        "C) Intersecting lines (unique solution)",
+        "D) Cannot be determined from the given information"
+      ],
+      "correct_answer": "B",
+      "explanation": "Write coefficients: a1=4, b1=6, c1=-8 and a2=2, b2=3, c2=-5. Compute ratios: a1/a2 = 4/2 = 2, b1/b2 = 6/3 = 2, c1/c2 = (-8)/(-5) = 8/5 = 1.6. Here a1/a2 = b1/b2 but a1/a2 \u2260 c1/c2. According to the criterion, if a1/a2 = b1/b2 \u2260 c1/c2 the lines are parallel and the pair is inconsistent (no solution). Therefore option B is correct.\nWhy the other options are wrong:\n- A is wrong because coincident lines require a1/a2 = b1/b2 = c1/c2 (all three ratios equal), which is not true here.\n- C is wrong because intersecting lines occur when a1/a2 \u2260 b1/b2; here they are equal.\n- D is wrong because the nature of the pair can be determined using the ratio test shown above.",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Compare the ratios a1/a2, b1/b2 and c1/c2 for the two equations in the form ax + by + c = 0.",
+        "If a1/a2 = b1/b2 but not equal to c1/c2, the lines are parallel (no solution)."
+      ],
+      "prerequisites": [
+        "Know the general form of a line ax + by + c = 0 and identify a, b, c.",
+        "Recall the ratio test: compare a1/a2, b1/b2 and c1/c2 to decide relations between two lines."
+      ],
+      "common_mistakes": [
+        "Forgetting the signs of c1 and c2 when computing c1/c2.",
+        "Concluding coincident lines merely because a1/a2 = b1/b2 (without checking c1/c2).",
+        "Computational errors in simplifying ratios (e.g., simplifying 4/2 and 6/3 incorrectly)."
+      ],
+      "quality_score": 0.96,
+      "question_id": "MATH-10-LIN-MCQ-006",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 9,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-REA-MCQ-007": {
+      "question_id": "MATH-10-REA-MCQ-007",
+      "question_text": "[Error: Could not generate question - LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=7484, total_tokens=9484, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=7040))]",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Error during generation: LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=7484, total_tokens=9484, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=7040))",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [],
+      "prerequisites": [],
+      "common_mistakes": [],
+      "quality_score": null,
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "error": true,
+        "error_message": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=7484, total_tokens=9484, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=7040))",
+        "error_phase": "llm"
+      },
+      "error": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=7484, total_tokens=9484, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=7040))",
+      "error_phase": "llm"
+    },
+    "MATH-10-POL-MCQ-008": {
+      "question_id": "MATH-10-POL-MCQ-008",
+      "question_text": "[Error: Could not generate question - LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=8796, total_tokens=10796, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=8064))]",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Error during generation: LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=8796, total_tokens=10796, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=8064))",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [],
+      "prerequisites": [],
+      "common_mistakes": [],
+      "quality_score": null,
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "error": true,
+        "error_message": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=8796, total_tokens=10796, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=8064))",
+        "error_phase": "llm"
+      },
+      "error": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=8796, total_tokens=10796, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=8064))",
+      "error_phase": "llm"
+    },
+    "MATH-10-REA-VSQ-001": {
+      "question_text": "If \u221a3 is irrational, determine whether \u221a3 + 1 is rational or irrational. Give a brief justification.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Assume, to the contrary, that \u221a3 + 1 is rational. Since 1 is rational, subtracting 1 from the assumed rational number gives \u221a3 = (\u221a3 + 1) \u2212 1, which would be rational. This contradicts the given fact that \u221a3 is irrational. Hence \u221a3 + 1 is irrational.",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Use a proof by contradiction: assume \u221a3 + 1 is rational.",
+        "Subtract 1 (a rational number) and use that the difference of two rationals is rational."
+      ],
+      "prerequisites": [
+        "Definition of rational and irrational numbers",
+        "Property: difference of two rationals is rational",
+        "Basic algebraic manipulation (addition/subtraction)"
+      ],
+      "common_mistakes": [
+        "Assuming that adding 1 to an irrational could produce a rational without justification.",
+        "Forgetting to use the contradiction that subtracting a rational from a rational yields a rational.",
+        "Confusing irrational + irrational and rational + irrational properties."
+      ],
+      "quality_score": 0.96,
+      "question_id": "MATH-10-REA-VSQ-001",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 8,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-POL-VSQ-002": {
+      "question_text": "The zeroes of the quadratic polynomial p(x) = ax^2 + bx + c are 3 and \u22122. If a = 2, find b and c, and hence write the polynomial p(x).",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Let the zeroes be \u03b1 = 3 and \u03b2 = \u22122. Sum of zeroes \u03b1 + \u03b2 = 3 + (\u22122) = 1. Using \u03b1 + \u03b2 = \u2212b/a, we get \u2212b/2 = 1 \u21d2 b = \u22122. Product of zeroes \u03b1\u03b2 = 3 \u00d7 (\u22122) = \u22126. Using \u03b1\u03b2 = c/a, we get c/2 = \u22126 \u21d2 c = \u221212. Hence the polynomial is p(x) = 2x^2 \u2212 2x \u2212 12 (which factors as 2(x \u2212 3)(x + 2)).",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Use sum of zeroes \u03b1 + \u03b2 = \u2212b/a to find b.",
+        "Use product of zeroes \u03b1\u03b2 = c/a to find c."
+      ],
+      "prerequisites": [
+        "Formulae for sum and product of zeroes of ax^2 + bx + c: \u03b1 + \u03b2 = \u2212b/a, \u03b1\u03b2 = c/a.",
+        "Basic algebraic substitution and solving linear equations."
+      ],
+      "common_mistakes": [
+        "Forgetting the negative sign in the relation \u03b1 + \u03b2 = \u2212b/a and getting the sign of b wrong.",
+        "Incorrectly computing the product sign (e.g., treating \u22126 as +6)."
+      ],
+      "quality_score": 0.95,
+      "question_id": "MATH-10-POL-VSQ-002",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 10,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-LIN-VSQ-003": {
+      "question_text": "Solve the following pair of linear equations by the substitution method and state the solution (x, y): 4x + 3y = 11 and x \u2212 2y = 5.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "From x \u2212 2y = 5, express x in terms of y: x = 5 + 2y. Substitute into 4x + 3y = 11: 4(5 + 2y) + 3y = 11 \u21d2 20 + 8y + 3y = 11 \u21d2 11y = 11 \u2212 20 = \u22129 \u21d2 y = \u22129/11. Now x = 5 + 2y = 5 + 2(\u22129/11) = 5 \u2212 18/11 = (55/11 \u2212 18/11) = 37/11. Therefore the solution is (x, y) = (37/11, \u22129/11). You can verify by substituting these values into both equations.",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Write one variable in terms of the other using one equation (e.g., x = 5 + 2y).",
+        "Substitute this expression into the other equation to obtain an equation in one variable, then solve.",
+        "Carefully simplify fractional results and substitute back to find the other variable."
+      ],
+      "prerequisites": [
+        "Understanding of the substitution method for solving linear equations",
+        "Ability to solve linear equations involving fractions",
+        "Basic algebraic manipulation (expanding and simplifying)"
+      ],
+      "common_mistakes": [
+        "Sign errors when substituting (e.g., mishandling \u22122y)",
+        "Arithmetic mistakes while expanding or combining like terms",
+        "Incorrect simplification of fractions when finding x after y"
+      ],
+      "quality_score": 0.96,
+      "question_id": "MATH-10-LIN-VSQ-003",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 10,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-REA-VSQ-004": {
+      "question_text": "Prove that sqrt(5) is irrational.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Assume, to the contrary, that sqrt(5) is rational. Then sqrt(5) = a/b for some integers a, b (b \u2260 0). Cancel any common factor so that gcd(a, b) = 1. Squaring both sides gives 5b^2 = a^2. Hence a^2 is divisible by 5, and by the property of primes, a is divisible by 5. Let a = 5k for some integer k. Substituting gives 5b^2 = 25k^2 \u21d2 b^2 = 5k^2. Thus b^2 is divisible by 5, so b is divisible by 5. Therefore a and b have 5 as a common factor, contradicting gcd(a, b) = 1. This contradiction implies that our assumption is false; hence sqrt(5) is irrational.",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Assume sqrt(5) is rational and express it as a/b in lowest terms.",
+        "Square both sides to get an equation involving a^2 and b^2.",
+        "Use the fact that if a prime p divides a^2 then p divides a."
+      ],
+      "prerequisites": [
+        "Definition of rational and irrational numbers",
+        "Divisibility properties and prime divisors (if p divides a^2 then p divides a)"
+      ],
+      "common_mistakes": [
+        "Not assuming a and b are coprime before reaching a contradiction",
+        "Incorrectly concluding from a^2 divisible by 5 that a^2 = 5 (instead of a is divisible by 5)",
+        "Forgetting to use the prime divisibility property and thus failing to obtain the contradiction"
+      ],
+      "quality_score": 0.96,
+      "question_id": "MATH-10-REA-VSQ-004",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 8,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-POL-VSQ-005": {
+      "question_text": "For the quadratic polynomial 6x^2 - kx + 8, one of its zeroes is 2/3. Find the value of k using the relationship between zeroes and coefficients.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Let the zeroes be \u03b1 = 2/3 and \u03b2. For a quadratic ax^2 + bx + c, product of zeroes \u03b1\u03b2 = c/a. Here a = 6 and c = 8, so \u03b1\u03b2 = 8/6 = 4/3. Thus \u03b2 = (4/3) \u00f7 (2/3) = 2. Sum of zeroes \u03b1 + \u03b2 = 2/3 + 2 = 8/3. For the polynomial 6x^2 - kx + 8, b = -k, so sum = -b/a = -(-k)/6 = k/6. Therefore k/6 = 8/3 \u21d2 k = 6 \u00d7 8/3 = 16. (Check: with k = 16, polynomial is 6x^2 - 16x + 8; dividing by 2 gives 3x^2 - 8x + 4 = 3(x - 2/3)(x - 2), zeros 2/3 and 2.)",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Use product of zeroes \u03b1\u03b2 = c/a to find the other zero.",
+        "Then use sum of zeroes \u03b1 + \u03b2 = -b/a to determine k."
+      ],
+      "prerequisites": [
+        "Relation between zeros and coefficients of a quadratic: \u03b1 + \u03b2 = -b/a, \u03b1\u03b2 = c/a",
+        "Basic fraction arithmetic and solving linear equations"
+      ],
+      "common_mistakes": [
+        "Treating b as k instead of b = -k for the polynomial 6x^2 - kx + 8",
+        "Arithmetic errors when dividing fractions while finding the other zero",
+        "Forgetting to use \u03b1\u03b2 = c/a and attempting to substitute directly into the polynomial without simplifying"
+      ],
+      "quality_score": 0.94,
+      "question_id": "MATH-10-POL-VSQ-005",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 10,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-POL-SA-001": {
+      "question_text": "If \u03b1 and \u03b2 are the zeroes of the quadratic polynomial 4x\u00b2 \u2212 4x + 1, find the value of \u03b1\u00b3 + \u03b2\u00b3 without finding \u03b1 and \u03b2. (3 marks)",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Step 1: Compare 4x\u00b2 \u2212 4x + 1 with ax\u00b2 + bx + c. So a = 4, b = \u22124, c = 1.\nStep 2: Use the relations sum of zeroes \u03b1 + \u03b2 = \u2212b/a and product \u03b1\u03b2 = c/a.\n\u03b1 + \u03b2 = \u2212(\u22124)/4 = 4/4 = 1.\n\u03b1\u03b2 = 1/4.\nStep 3: Use identity \u03b1\u00b3 + \u03b2\u00b3 = (\u03b1 + \u03b2)\u00b3 \u2212 3\u03b1\u03b2(\u03b1 + \u03b2).\nSubstitute values: \u03b1\u00b3 + \u03b2\u00b3 = (1)\u00b3 \u2212 3\u00b7(1/4)\u00b7(1) = 1 \u2212 3/4 = 1/4.\nTherefore, \u03b1\u00b3 + \u03b2\u00b3 = 1/4.",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Find \u03b1 + \u03b2 and \u03b1\u03b2 from the coefficients using \u03b1 + \u03b2 = \u2212b/a and \u03b1\u03b2 = c/a.",
+        "Use the identity \u03b1\u00b3 + \u03b2\u00b3 = (\u03b1 + \u03b2)\u00b3 \u2212 3\u03b1\u03b2(\u03b1 + \u03b2)."
+      ],
+      "prerequisites": [
+        "Relation between zeroes and coefficients of ax\u00b2 + bx + c: \u03b1 + \u03b2 = \u2212b/a, \u03b1\u03b2 = c/a.",
+        "Algebraic identity for sum of cubes: \u03b1\u00b3 + \u03b2\u00b3 = (\u03b1 + \u03b2)\u00b3 \u2212 3\u03b1\u03b2(\u03b1 + \u03b2)."
+      ],
+      "common_mistakes": [
+        "Forgetting the sign in \u03b1 + \u03b2 = \u2212b/a (sign error when b is negative).",
+        "Applying the wrong identity (e.g., using \u03b1\u00b3 + \u03b2\u00b3 = (\u03b1 + \u03b2)\u00b3 without subtracting 3\u03b1\u03b2(\u03b1 + \u03b2)).",
+        "Arithmetic errors when simplifying fractions (especially with \u03b1\u03b2 = c/a)."
+      ],
+      "quality_score": 0.96,
+      "question_id": "MATH-10-POL-SA-001",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 10,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-LIN-SA-002": {
+      "question_id": "MATH-10-LIN-SA-002",
+      "question_text": "[Error: Could not generate question - LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=6375, total_tokens=8375, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))]",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Error during generation: LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=6375, total_tokens=8375, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [],
+      "prerequisites": [],
+      "common_mistakes": [],
+      "quality_score": null,
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "error": true,
+        "error_message": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=6375, total_tokens=8375, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+        "error_phase": "llm"
+      },
+      "error": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=6375, total_tokens=8375, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+      "error_phase": "llm"
+    },
+    "MATH-10-LIN-SA-003": {
+      "question_text": "A lending library has a fixed charge for the first three days and an additional charge for each day thereafter. Saritha paid \u20b927 for a book she kept for seven days, while Susy paid \u20b921 for a book she kept for five days. Form the pair of linear equations and find the fixed charge and the charge for each extra day.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Step 1: Let F be the fixed charge for the first three days and d be the charge for each extra day.\n\nStep 2: Express the total charges as equations. For 7 days, number of extra days = 7 \u2212 3 = 4, so\nF + 4d = 27  ... (1)\nFor 5 days, number of extra days = 5 \u2212 3 = 2, so\nF + 2d = 21  ... (2)\n\nStep 3: Subtract equation (2) from equation (1) to eliminate F:\n(F + 4d) \u2212 (F + 2d) = 27 \u2212 21\n\u21d2 2d = 6\n\u21d2 d = 3\n\nStep 4: Substitute d = 3 into equation (2) to find F:\nF + 2(3) = 21\n\u21d2 F + 6 = 21\n\u21d2 F = 15\n\nAnswer: The fixed charge is \u20b915 and the charge for each extra day is \u20b93.\n\nVerification: For 7 days: 15 + 4\u00d73 = 15 + 12 = 27 (matches). For 5 days: 15 + 2\u00d73 = 21 (matches).",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Assign variables for the fixed charge and the per-extra-day charge.",
+        "Write equations using number of extra days = total days \u2212 3, then eliminate one variable by subtraction."
+      ],
+      "prerequisites": [
+        "Forming linear equations from word problems",
+        "Elimination (subtracting equations) to eliminate a variable",
+        "Basic algebraic manipulation (substitution and solving linear equations)"
+      ],
+      "common_mistakes": [
+        "Using total days instead of extra days (forgetting to subtract the first 3 days)",
+        "Arithmetic errors when subtracting the two equations",
+        "Substituting wrong value back when finding the other variable"
+      ],
+      "quality_score": 0.96,
+      "question_id": "MATH-10-LIN-SA-003",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 10,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-POL-SA-004": {
+      "question_text": "Let \u03b1 and \u03b2 be the zeroes of the quadratic polynomial 2x\u00b2 \u2212 8x + k. If \u03b1\u00b2 + \u03b2\u00b2 = 7, find the value of k. (Show all steps.)",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Given polynomial: 2x\u00b2 \u2212 8x + k. Compare with ax\u00b2 + bx + c: a = 2, b = \u22128, c = k.\nStep 1: Sum of zeroes: \u03b1 + \u03b2 = \u2212b/a = \u2212(\u22128)/2 = 8/2 = 4.\nStep 2: Product of zeroes: \u03b1\u03b2 = c/a = k/2.\nStep 3: Use identity \u03b1\u00b2 + \u03b2\u00b2 = (\u03b1 + \u03b2)\u00b2 \u2212 2\u03b1\u03b2.\nSo \u03b1\u00b2 + \u03b2\u00b2 = (4)\u00b2 \u2212 2(k/2) = 16 \u2212 k.\nStep 4: Given \u03b1\u00b2 + \u03b2\u00b2 = 7, therefore 16 \u2212 k = 7 \u21d2 k = 16 \u2212 7 = 9.\nHence k = 9, and the polynomial becomes 2x\u00b2 \u2212 8x + 9.",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Write expressions for sum and product of zeroes in terms of a, b and c.",
+        "Use the identity \u03b1\u00b2 + \u03b2\u00b2 = (\u03b1 + \u03b2)\u00b2 \u2212 2\u03b1\u03b2 and substitute the values.",
+        "Solve the resulting linear equation for k."
+      ],
+      "prerequisites": [
+        "Sum and product of zeroes for ax\u00b2 + bx + c: \u03b1 + \u03b2 = \u2212b/a, \u03b1\u03b2 = c/a",
+        "Algebraic identity: \u03b1\u00b2 + \u03b2\u00b2 = (\u03b1 + \u03b2)\u00b2 \u2212 2\u03b1\u03b2",
+        "Basic algebraic manipulation and solving linear equations"
+      ],
+      "common_mistakes": [
+        "Using c instead of c/a for the product \u03b1\u03b2 (forgetting to divide by a)",
+        "Applying the identity incorrectly as \u03b1\u00b2 + \u03b2\u00b2 = (\u03b1 + \u03b2)\u00b2 (omitting \u22122\u03b1\u03b2)",
+        "Arithmetic sign errors when computing \u2212b/a"
+      ],
+      "quality_score": 0.96,
+      "question_id": "MATH-10-POL-SA-004",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 10,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-LIN-SA-005": {
+      "question_id": "MATH-10-LIN-SA-005",
+      "question_text": "[Error: Could not generate question - LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=6375, total_tokens=8375, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))]",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Error during generation: LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=6375, total_tokens=8375, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [],
+      "prerequisites": [],
+      "common_mistakes": [],
+      "quality_score": null,
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "error": true,
+        "error_message": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=6375, total_tokens=8375, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+        "error_phase": "llm"
+      },
+      "error": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=6375, total_tokens=8375, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+      "error_phase": "llm"
+    },
+    "MATH-10-LIN-SA-006": {
+      "question_id": "MATH-10-LIN-SA-006",
+      "question_text": "[Error: Could not generate question - LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=5671, total_tokens=7671, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))]",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Error during generation: LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=5671, total_tokens=7671, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [],
+      "prerequisites": [],
+      "common_mistakes": [],
+      "quality_score": null,
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "error": true,
+        "error_message": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=5671, total_tokens=7671, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+        "error_phase": "llm"
+      },
+      "error": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=5671, total_tokens=7671, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+      "error_phase": "llm"
+    },
+    "MATH-10-REA-LA-001": {
+      "question_text": "Three machines in a factory start working simultaneously at time t = 0. Machine A completes a cycle every 72 seconds, Machine B every 90 seconds and Machine C every 150 seconds. (a) After how many seconds will all three machines next start a cycle together? (b) Using the Fundamental Theorem of Arithmetic, justify why your answer is the least positive time when they all start together.",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Solution:\nStep 1: Interpret the problem. We need the least positive time T such that T is a common multiple of 72, 90 and 150. That is, T = LCM(72, 90, 150).\n\nStep 2: Prime factorise each number (use Fundamental Theorem of Arithmetic to write each as product of primes):\n72 = 2^3 \u00d7 3^2  (since 72 = 8 \u00d7 9)\n90 = 2 \u00d7 3^2 \u00d7 5  (since 90 = 2 \u00d7 9 \u00d7 5)\n150 = 2 \u00d7 3 \u00d7 5^2  (since 150 = 2 \u00d7 3 \u00d7 25)\n\nStep 3: To form a common multiple we must include the primes 2, 3 and 5 with exponents at least as large as those appearing in each factorisation. For the least common multiple we take the highest exponent of each prime that appears among the three factorizations:\n- Highest power of 2 is 2^3 (from 72)\n- Highest power of 3 is 3^2 (from 72 and 90)\n- Highest power of 5 is 5^2 (from 150)\n\nSo LCM(72, 90, 150) = 2^3 \u00d7 3^2 \u00d7 5^2.\n\nStep 4: Compute the LCM numerically:\n2^3 \u00d7 3^2 \u00d7 5^2 = 8 \u00d7 9 \u00d7 25 = 72 \u00d7 25 = 1800.\n\nTherefore (a) all three machines will next start together after 1800 seconds. Converting to minutes: 1800 s = 30 minutes.\n\nStep 5: Justification using the Fundamental Theorem of Arithmetic (FTA):\nBy FTA each of the three numbers has a unique prime-power factorisation. Any common multiple T must, when prime-factorised, contain each prime 2, 3 and 5 with exponent greater than or equal to the exponent appearing in the factorisation of each of the three numbers. To get the least such T we must choose for each prime the maximum exponent that occurs among the three numbers. The number obtained in this way is unique and equals 2^3\u00d73^2\u00d75^2 = 1800. Hence 1800 is the least positive common multiple and thus the least positive time when all three machines start together. This conclusion directly follows from uniqueness of prime factorisation guaranteed by the Fundamental Theorem of Arithmetic.\n\nAnswer: (a) 1800 seconds (b) Justified above using FTA; 1800 is the least such time.",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [
+        "Prime-factorise each period (72, 90, 150) into powers of primes.",
+        "To find LCM take each prime with the highest exponent occurring among the numbers.",
+        "Use uniqueness of prime factorisation (Fundamental Theorem of Arithmetic) to justify minimality."
+      ],
+      "prerequisites": [
+        "Understanding of prime numbers and prime factorisation",
+        "Definition of LCM and how to compute it using prime powers",
+        "Familiarity with the Fundamental Theorem of Arithmetic (uniqueness of prime factorisation)"
+      ],
+      "common_mistakes": [
+        "Taking the product of the numbers instead of the LCM (gives a much larger number).",
+        "Not using the highest exponent for each prime (e.g., using 2^1 instead of 2^3), leading to a smaller number that may not be a common multiple.",
+        "Arithmetic errors when multiplying the prime powers (e.g., incorrect multiplication of 8 \u00d7 9 \u00d7 25)."
+      ],
+      "quality_score": 0.97,
+      "question_id": "MATH-10-REA-LA-001",
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "max_tokens": 2000,
+        "chunks_used": 7,
+        "few_shot_enabled": true,
+        "quality_check_enabled": true,
+        "quality_valid": true
+      },
+      "error": null
+    },
+    "MATH-10-POL-LA-002": {
+      "question_id": "MATH-10-POL-LA-002",
+      "question_text": "[Error: Could not generate question - LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=8339, total_tokens=10339, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))]",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Error during generation: LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=8339, total_tokens=10339, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [],
+      "prerequisites": [],
+      "common_mistakes": [],
+      "quality_score": null,
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "error": true,
+        "error_message": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=8339, total_tokens=10339, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+        "error_phase": "llm"
+      },
+      "error": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=8339, total_tokens=10339, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+      "error_phase": "llm"
+    },
+    "MATH-10-LIN-LA-003": {
+      "question_id": "MATH-10-LIN-LA-003",
+      "question_text": "[Error: Could not generate question - LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=5750, total_tokens=7750, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=4864))]",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Error during generation: LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=5750, total_tokens=7750, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=4864))",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [],
+      "prerequisites": [],
+      "common_mistakes": [],
+      "quality_score": null,
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "error": true,
+        "error_message": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=5750, total_tokens=7750, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=4864))",
+        "error_phase": "llm"
+      },
+      "error": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=5750, total_tokens=7750, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=4864))",
+      "error_phase": "llm"
+    },
+    "MATH-10-REA-LA-004": {
+      "question_id": "MATH-10-REA-LA-004",
+      "question_text": "[Error: Could not generate question - LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=4954, total_tokens=6954, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))]",
+      "options": null,
+      "correct_answer": null,
+      "explanation": "Error during generation: LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=4954, total_tokens=6954, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+      "diagram_needed": false,
+      "diagram_description": null,
+      "hints": [],
+      "prerequisites": [],
+      "common_mistakes": [],
+      "quality_score": null,
+      "generation_metadata": {
+        "model": "gpt-5-mini",
+        "temperature": 0.3,
+        "error": true,
+        "error_message": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=4954, total_tokens=6954, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+        "error_phase": "llm"
+      },
+      "error": "LLM generation error: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2000, prompt_tokens=4954, total_tokens=6954, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=0, audio_tokens=0, reasoning_tokens=2000, rejected_prediction_tokens=0), prompt_tokens_details=PromptTokensDetails(audio_tokens=0, cached_tokens=0))",
+      "error_phase": "llm"
+    }
+  }
+}

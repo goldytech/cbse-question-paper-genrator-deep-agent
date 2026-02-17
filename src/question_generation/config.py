@@ -13,6 +13,7 @@ from docx_generation.tool import generate_docx_tool
 from input_file_locator.tool import locate_blueprint_tool
 from cbse_question_retriever.tool import generate_question_tool
 from cbse_question_retriever.llm_question_generator import generate_llm_question_tool
+from question_assembler.tool import assemble_question_tool
 
 # Skill root path
 SKILL_ROOT = "src/skills"
@@ -50,9 +51,9 @@ CBSE_QUESTION_RETRIEVER_SUBAGENT: Dict[str, Any] = {
 # Uses GPT-4o for high-quality question generation
 QUESTION_ASSEMBLER_SUBAGENT: Dict[str, Any] = {
     "name": "question-assembler",
-    "description": "Assembles CBSE-compliant questions from search results",
+    "description": "Assembles CBSE-compliant questions from search results and LLM-generated content. Takes retrieved chunks and LLM output to create complete question objects with proper IDs, diagram detection, and formatting.",
     "model": "openai:gpt-4o",
-    "tools": [generate_diagram_tool],  # Can generate diagrams
+    "tools": [assemble_question_tool, generate_diagram_tool],
     "skills": [f"{SKILL_ROOT}/question-assembler/"],
 }
 

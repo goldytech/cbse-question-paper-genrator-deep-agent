@@ -333,8 +333,8 @@ def build_generation_prompt(
 
     # Fill in the template
     prompt = CBSE_QUESTION_GENERATION_PROMPT.format(
-        class_level=blueprint_context.get("class_level", 10),
-        subject=blueprint_context.get("subject", "Mathematics"),
+        class_level=blueprint_context.get("class_level","" ),
+        subject=blueprint_context.get("subject", ""),
         chapter=blueprint_context.get("chapter", ""),
         topic=blueprint_context.get("topic", ""),
         section_title=blueprint_context.get("section_title", ""),

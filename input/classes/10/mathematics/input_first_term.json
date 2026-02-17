@@ -18,26 +18,22 @@
       {
         "chapter_name": "Real Numbers",
         "topics": [
-          "Euclid’s Division Algorithm",
-          "Fundamental Theorem of Arithmetic",
-          "HCF and LCM using Prime Factorisation"
+          "The Fundamental Theorem of Arithmetic",
+          "Revisiting Irrational Numbers"
         ]
       },
       {
         "chapter_name": "Polynomials",
         "topics": [
-          "Zeros of a Polynomial",
-          "Geometrical Meaning of Zeroes",
-          "Relationship between Zeroes and Coefficients"
+          "Geometrical Meaning of the Zeroes of a Polynomial",
+          "Relationship between Zeroes and Coefficients of a Polynomial"
         ]
       },
       {
         "chapter_name": "Pair of Linear Equations in Two Variables",
         "topics": [
-          "Graphical Method",
-          "Consistency of Linear Equations",
-          "Substitution Method",
-          "Elimination Method"
+          "Graphical Method of Solution of a Pair of Linear Equations",
+          "Algebraic Methods of Solving a Pair of Linear Equations"
         ]
       }
     ]
@@ -68,9 +64,9 @@
         "UNDERSTAND"
       ],
       "topic_focus": [
-        "Euclid’s Division Algorithm",
-        "Zeros of a Polynomial",
-        "Consistency of Linear Equations"
+        "The Fundamental Theorem of Arithmetic",
+        "Geometrical Meaning of the Zeroes of a Polynomial",
+        "Graphical Method of Solution of a Pair of Linear Equations"
       ]
     },
 
@@ -90,9 +86,9 @@
         "APPLY"
       ],
       "topic_focus": [
-        "HCF and LCM using Prime Factorisation",
-        "Geometrical Meaning of Zeroes",
-        "Graphical Method"
+        "Revisiting Irrational Numbers",
+        "Relationship between Zeroes and Coefficients of a Polynomial",
+        "Algebraic Methods of Solving a Pair of Linear Equations"
       ]
     },
 
@@ -117,9 +113,9 @@
         "ANALYSE"
       ],
       "topic_focus": [
-        "Relationship between Zeroes and Coefficients",
-        "Substitution Method",
-        "Elimination Method"
+        "Relationship between Zeroes and Coefficients of a Polynomial",
+        "Graphical Method of Solution of a Pair of Linear Equations",
+        "Algebraic Methods of Solving a Pair of Linear Equations"
       ]
     },
 
@@ -144,9 +140,9 @@
         "EVALUATE"
       ],
       "topic_focus": [
-        "Fundamental Theorem of Arithmetic",
-        "Graphical Method",
-        "Word Problems on Linear Equations"
+        "The Fundamental Theorem of Arithmetic",
+        "Geometrical Meaning of the Zeroes of a Polynomial",
+        "Algebraic Methods of Solving a Pair of Linear Equations"
       ]
     }
   ]

@@ -5,11 +5,12 @@ Uses ChatOpenAI from langchain_openai for gpt-5-mini integration.
 
 import json
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from cbse_question_retriever.output_schema import QuestionOutput
 from cbse_question_retriever.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -46,14 +47,14 @@ class LLMClient:
 
         return self._llm
 
-    def generate_question(self, prompt: str) -> str:
-        """Generate question using LLM.
+    def generate_question(self, prompt: str) -> Dict[str, Any]:
+        """Generate question using LLM with structured output.
 
         Args:
             prompt: Complete prompt with context and instructions
 
         Returns:
-            Raw LLM response text
+            Parsed question dictionary from structured output
         """
         try:
             messages = [
@@ -63,11 +64,23 @@ class LLMClient:
                 HumanMessage(content=prompt),
             ]
 
-            logger.info(f"Calling LLM ({self._model}) for question generation...")
-            response = self.llm.invoke(messages)
-            logger.info("LLM question generation completed")
+            logger.info(
+                f"Calling LLM ({self._model}) for question generation with structured output..."
+            )
 
-            return response.content
+            # Use structured output to ensure valid JSON
+            structured_llm = self.llm.with_structured_output(QuestionOutput)
+            response = structured_llm.invoke(messages)
+
+            logger.info("LLM question generation completed with structured output")
+
+            # Convert Pydantic model to dictionary
+            if hasattr(response, "model_dump"):
+                return response.model_dump()
+            elif hasattr(response, "dict"):
+                return response.dict()
+            else:
+                return dict(response)
 
         except Exception as e:
             logger.error(f"Error generating question with LLM: {e}")

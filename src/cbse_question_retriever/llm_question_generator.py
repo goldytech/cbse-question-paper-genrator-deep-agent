@@ -108,13 +108,27 @@ def generate_llm_question_tool(
             f"{blueprint_context.get('topic')} ({blueprint_context.get('question_format')})"
         )
 
-        # Check if we have chunks to work with
+        # Check if retrieval had errors (passed via blueprint_context)
+        retrieval_error = blueprint_context.get("retrieval_error")
+        if retrieval_error:
+            logger.warning(
+                f"Skipping LLM generation for {question_id} due to retrieval error: {retrieval_error}"
+            )
+            return create_error_response(
+                question_id,
+                blueprint_context,
+                f"Retrieval failed: {retrieval_error}",
+                error_phase="retrieval",
+            )
+
+        # Check if we have valid chunks to work with
         if not chunks:
             logger.error("No chunks provided for question generation")
             return create_error_response(
                 question_id,
                 blueprint_context,
                 "No textbook chunks provided for question generation",
+                error_phase="retrieval",
             )
 
         # Step 1: Build generation prompt
@@ -132,23 +146,20 @@ def generate_llm_question_tool(
             f"Generation prompt built (examples={include_examples}, quality={include_quality})"
         )
 
-        # Step 2: Generate question using LLM
+        # Step 2: Generate question using LLM with structured output
         try:
-            llm_response = llm_client.generate_question(prompt)
-            logger.info("LLM question generation completed successfully")
+            question_data = llm_client.generate_question(prompt)
+            logger.info("LLM question generation completed successfully with structured output")
         except Exception as e:
             logger.error(f"LLM generation failed: {e}")
             return create_error_response(
                 question_id,
                 blueprint_context,
                 f"LLM generation error: {str(e)}",
+                error_phase="llm",
             )
 
-        # Step 3: Parse LLM response
-        question_data = parse_llm_response(llm_response, include_quality_score=include_quality)
-        logger.debug(f"Parsed question data: {question_data.get('question_text', '')[:50]}...")
-
-        # Step 4: Validate quality (best-effort: continue even if validation fails)
+        # Step 3: Validate quality
         is_valid = validate_question_quality(question_data)
         if not is_valid:
             logger.warning("Question quality validation failed, but continuing with best-effort")
@@ -193,6 +204,7 @@ def generate_llm_question_tool(
             question_id,
             blueprint_context,
             f"Unexpected error: {str(e)}",
+            error_phase="llm",
         )
 
 
@@ -200,6 +212,7 @@ def create_error_response(
     question_id: str,
     blueprint_context: Dict[str, Any],
     error_message: str,
+    error_phase: str = "llm",
 ) -> Dict[str, Any]:
     """Create an error response with minimal valid structure.
 
@@ -207,6 +220,7 @@ def create_error_response(
         question_id: The question ID
         blueprint_context: Blueprint context
         error_message: Error description
+        error_phase: Phase where error occurred ("retrieval" or "llm")
 
     Returns:
         Error response dictionary
@@ -230,6 +244,8 @@ def create_error_response(
             "temperature": settings.llm.temperature,
             "error": True,
             "error_message": error_message,
+            "error_phase": error_phase,
         },
         "error": error_message,
+        "error_phase": error_phase,
     }
