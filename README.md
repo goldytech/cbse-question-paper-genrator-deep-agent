@@ -542,12 +542,16 @@ Human-in-the-Loop is configured in `config/agent_config.py`:
 
 ### Subagent Configuration
 
-Four subagents are configured:
+Six subagents are configured:
 
-1. **blueprint-validator**: Validates blueprint JSON structure
-2. **question-researcher**: Searches and rephrases CBSE questions, **generates diagrams automatically**
-3. **paper-validator**: Validates final paper against blueprint
-4. **docx-generator**: **NEW** - Converts JSON papers to DOCX with embedded images
+1. **input-file-locator**: Locates and validates teacher's input blueprint JSON files
+2. **blueprint-validator**: Validates exam blueprint against master policy blueprints (two-blueprint validation)
+3. **cbse-question-retriever**: **NEW** - Two-tier system:
+   - Step 1: Retrieves chunks from Qdrant vector database using hybrid search
+   - Step 2: Generates questions using gpt-5-mini with few-shot examples and quality checks
+4. **question-assembler**: Assembles and formats final CBSE-compliant questions
+5. **paper-validator**: Validates final paper against blueprint
+6. **docx-generator**: Converts JSON papers to DOCX with embedded images
 
 ## Diagram Generation Features
 

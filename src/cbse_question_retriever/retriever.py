@@ -183,8 +183,8 @@ class BlueprintRetriever:
         meta = blueprint.get("metadata", {})
         return BlueprintMetadata(
             class_level=meta.get("class", 10),
-            subject=meta.get("subject", "Mathematics"),
-            assessment_type=meta.get("assessment_type", "Unit Test"),
+            subject=meta.get("subject", ""),
+            assessment_type=meta.get("assessment_type", ""),
             total_marks=meta.get("total_marks", 0),
             chapters=blueprint.get("syllabus_scope", {}).get("chapters", []),
         )
