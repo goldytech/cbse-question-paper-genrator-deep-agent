@@ -10,7 +10,12 @@ from cbse_question_retriever.fuzzy_matcher import fuzzy_matcher
 from cbse_question_retriever.qdrant_client import qdrant_manager
 from cbse_question_retriever.question_id_generator import question_id_generator
 from cbse_question_retriever.settings import settings
-from cbse_question_retriever.data_types import BlueprintMetadata, BlueprintSection, Chunk, RetrievedData
+from cbse_question_retriever.data_types import (
+    BlueprintMetadata,
+    BlueprintSection,
+    Chunk,
+    RetrievedData,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -47,8 +52,6 @@ class BlueprintRetriever:
             if not qdrant_manager.check_collection_exists(collection_name):
                 available = qdrant_manager.get_available_collections()
                 return self._create_error_response(
-                    section_id,
-                    question_number,
                     section,
                     f"Collection '{collection_name}' not found. Available: {available}",
                 )
@@ -60,8 +63,6 @@ class BlueprintRetriever:
 
             if not chapter:
                 return self._create_error_response(
-                    section_id,
-                    question_number,
                     section,
                     f"Topic '{topic}' not found in any chapter of syllabus scope",
                 )
@@ -74,8 +75,6 @@ class BlueprintRetriever:
 
             if not matched_topic:
                 return self._create_error_response(
-                    section_id,
-                    question_number,
                     section,
                     f"Topic '{topic}' not found. Did you mean: {', '.join(suggestions[:3])}?",
                 )
@@ -98,8 +97,6 @@ class BlueprintRetriever:
 
             if not raw_chunks:
                 return self._create_error_response(
-                    section_id,
-                    question_number,
                     section,
                     f"No content found for {chapter}/{matched_topic}",
                 )
@@ -160,18 +157,12 @@ class BlueprintRetriever:
             )
 
         except FileNotFoundError as e:
-            return self._create_error_response(
-                section_id, question_number, None, f"Blueprint file not found: {e}"
-            )
+            return self._create_error_response(None, f"Blueprint file not found: {e}")
         except json.JSONDecodeError as e:
-            return self._create_error_response(
-                section_id, question_number, None, f"Invalid JSON in blueprint: {e}"
-            )
+            return self._create_error_response(None, f"Invalid JSON in blueprint: {e}")
         except Exception as e:
             logger.exception("Unexpected error during retrieval")
-            return self._create_error_response(
-                section_id, question_number, None, f"Retrieval error: {e}"
-            )
+            return self._create_error_response(None, f"Retrieval error: {e}")
 
     def _load_blueprint(self, blueprint_path: str) -> Dict[str, Any]:
         """Load blueprint JSON file."""
@@ -238,8 +229,6 @@ class BlueprintRetriever:
 
     def _create_error_response(
         self,
-        section_id: str,
-        question_number: int,
         section: Optional[BlueprintSection],
         error_message: str,
     ) -> RetrievedData:
