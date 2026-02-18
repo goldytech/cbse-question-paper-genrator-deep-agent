@@ -5,7 +5,7 @@ from typing import List, Optional, Tuple
 
 from rapidfuzz import fuzz, process
 
-from cbse_question_retriever.settings import settings
+from .settings import settings
 
 logger = logging.getLogger(__name__)
 

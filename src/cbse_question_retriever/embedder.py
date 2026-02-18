@@ -5,7 +5,7 @@ from typing import List
 
 from openai import OpenAI
 
-from cbse_question_retriever.settings import settings
+from .settings import settings
 
 logger = logging.getLogger(__name__)
 

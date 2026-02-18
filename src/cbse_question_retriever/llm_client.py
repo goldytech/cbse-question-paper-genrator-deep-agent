@@ -10,8 +10,8 @@ from typing import Any, Dict, Optional, Union
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from cbse_question_retriever.output_schema import QuestionOutput
-from cbse_question_retriever.settings import settings
+from .output_schema import QuestionOutput
+from .settings import settings
 
 logger = logging.getLogger(__name__)
 

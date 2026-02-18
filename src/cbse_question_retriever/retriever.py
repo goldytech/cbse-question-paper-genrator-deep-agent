@@ -4,13 +4,13 @@ import json
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
-from cbse_question_retriever.chunk_mixer import chunk_mixer
-from cbse_question_retriever.embedder import embedding_generator
-from cbse_question_retriever.fuzzy_matcher import fuzzy_matcher
-from cbse_question_retriever.qdrant_client import qdrant_manager
-from cbse_question_retriever.question_id_generator import question_id_generator
-from cbse_question_retriever.settings import settings
-from cbse_question_retriever.data_types import (
+from .chunk_mixer import chunk_mixer
+from .embedder import embedding_generator
+from .fuzzy_matcher import fuzzy_matcher
+from .qdrant_client import qdrant_manager
+from .question_id_generator import question_id_generator
+from .settings import settings
+from .data_types import (
     BlueprintMetadata,
     BlueprintSection,
     Chunk,

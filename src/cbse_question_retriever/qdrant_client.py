@@ -7,8 +7,8 @@ from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import UnexpectedResponse
 from qdrant_client.http.models import Distance, VectorParams
 
-from cbse_question_retriever.settings import settings
-from cbse_question_retriever.data_types import Chunk, ChunkType
+from .settings import settings
+from .data_types import Chunk, ChunkType
 
 logger = logging.getLogger(__name__)
 

@@ -1,110 +1,10 @@
 """Prompt templates for LLM question generation.
 
 Contains detailed prompts with few-shot examples for different question formats.
+Few-shot examples are loaded dynamically based on subject and class level.
 """
 
-# Few-shot examples by question format
-MCQ_EXAMPLE = """
-EXAMPLE 1 - MCQ (Multiple Choice Question):
-Topic: Zeros of a Polynomial
-Cognitive Level: REMEMBER
-Difficulty: Easy
-Marks: 1
-
-Textbook Context:
-A polynomial p(x) has zeros where p(x) = 0. For linear polynomial ax + b, zero is -b/a.
-
-Generated Question:
-{
-  "question_text": "What is the zero of the polynomial p(x) = x - 3?",
-  "options": ["A) 0", "B) 3", "C) -3", "D) 1"],
-  "correct_answer": "B",
-  "explanation": "To find the zero of a polynomial, set p(x) = 0. Therefore: x - 3 = 0 → x = 3. The zero is 3.",
-  "diagram_needed": false,
-  "diagram_description": null,
-  "hints": ["Set the polynomial equal to zero", "Solve for x"],
-  "prerequisites": ["Understanding polynomial zeros", "Basic equation solving"],
-  "common_mistakes": ["Confusing zero with coefficient", "Sign errors"],
-  "quality_score": 0.95
-}
-"""
-
-VERY_SHORT_EXAMPLE = """
-EXAMPLE 2 - VERY SHORT ANSWER:
-Topic: Euclid's Division Algorithm
-Cognitive Level: UNDERSTAND
-Difficulty: Easy
-Marks: 2
-
-Textbook Context:
-Euclid's division lemma states that for positive integers a and b, there exist unique integers q and r such that a = bq + r, where 0 ≤ r < b.
-
-Generated Question:
-{
-  "question_text": "State Euclid's division lemma for positive integers.",
-  "options": null,
-  "correct_answer": null,
-  "explanation": "Euclid's division lemma states that for any two positive integers a and b, there exist unique integers q and r such that a = bq + r, where 0 ≤ r < b. Here, a is the dividend, b is the divisor, q is the quotient, and r is the remainder.",
-  "diagram_needed": false,
-  "diagram_description": null,
-  "hints": ["Recall the relationship between dividend, divisor, quotient, and remainder"],
-  "prerequisites": ["Division concept", "Understanding of dividend and divisor"],
-  "common_mistakes": ["Forgetting the condition 0 ≤ r < b", "Confusing quotient and remainder"],
-  "quality_score": 0.92
-}
-"""
-
-SHORT_EXAMPLE = """
-EXAMPLE 3 - SHORT ANSWER:
-Topic: Relationship between Zeroes and Coefficients
-Cognitive Level: APPLY
-Difficulty: Medium
-Marks: 3
-
-Textbook Context:
-For quadratic polynomial ax² + bx + c with zeroes α and β:
-Sum of zeroes: α + β = -b/a
-Product of zeroes: αβ = c/a
-
-Generated Question:
-{
-  "question_text": "If α and β are the zeroes of the polynomial x² - 5x + 6, find the value of α² + β² without finding the actual zeroes.",
-  "options": null,
-  "correct_answer": null,
-  "explanation": "Given: x² - 5x + 6, comparing with ax² + bx + c, we get a=1, b=-5, c=6.\\nSum of zeroes: α + β = -b/a = -(-5)/1 = 5\\nProduct of zeroes: αβ = c/a = 6/1 = 6\\nUsing identity: α² + β² = (α + β)² - 2αβ\\n= (5)² - 2(6)\\n= 25 - 12\\n= 13",
-  "diagram_needed": false,
-  "diagram_description": null,
-  "hints": ["Use the identity: α² + β² = (α+β)² - 2αβ", "First find sum and product of zeroes"],
-  "prerequisites": ["Quadratic polynomial zeroes", "Algebraic identities"],
-  "common_mistakes": ["Sign errors in the formula", "Calculating (α+β)² incorrectly", "Finding actual zeroes first (time consuming)"],
-  "quality_score": 0.94
-}
-"""
-
-LONG_EXAMPLE = """
-EXAMPLE 4 - LONG ANSWER:
-Topic: Pair of Linear Equations
-Cognitive Level: ANALYSE
-Difficulty: Hard
-Marks: 5
-
-Textbook Context:
-A pair of linear equations in two variables can be solved using elimination method: make coefficients of one variable equal and eliminate it.
-
-Generated Question:
-{
-  "question_text": "Solve the following pair of linear equations using elimination method and interpret the result: 2x + 3y = 12 and 4x + 6y = 20. What does this tell you about the lines represented by these equations?",
-  "options": null,
-  "correct_answer": null,
-  "explanation": "Given equations:\\n2x + 3y = 12 ... (1)\\n4x + 6y = 20 ... (2)\\n\\nMultiply equation (1) by 2:\\n4x + 6y = 24 ... (3)\\n\\nSubtract equation (2) from (3):\\n(4x + 6y) - (4x + 6y) = 24 - 20\\n0 = 4\\n\\nThis is a contradiction (0 ≠ 4), which means the system has no solution.\\n\\nInterpretation: The lines represented by these equations are parallel and never intersect. This is because the ratios of coefficients are equal: a₁/a₂ = 2/4 = 1/2, b₁/b₂ = 3/6 = 1/2, but c₁/c₂ = 12/20 = 3/5. Since a₁/a₂ = b₁/b₂ ≠ c₁/c₂, the lines are parallel and inconsistent.",
-  "diagram_needed": true,
-  "diagram_description": "Two parallel lines on coordinate axes with positive slopes, labeled L1 and L2, showing they never intersect",
-  "hints": ["Try to make coefficients equal by multiplication", "Check if you get a valid solution or contradiction", "Compare ratios a₁/a₂, b₁/b₂, and c₁/c₂"],
-  "prerequisites": ["Elimination method", "Understanding of linear equations", "Ratio comparison"],
-  "common_mistakes": ["Not checking the ratios after getting contradiction", "Calculation errors in multiplication", "Incorrect interpretation of no solution"],
-  "quality_score": 0.96
-}
-"""
+from .few_shot_examples import get_examples_for_subject
 
 # Format-specific instructions
 FORMAT_INSTRUCTIONS = {
@@ -219,53 +119,51 @@ Return ONLY a valid JSON object with exactly this structure:
   "question_text": "The actual question text - clear and precise",
   "options": [{options_field}],
   "correct_answer": {correct_answer_field},
-  "explanation": "Step-by-step solution or detailed reasoning",
+  "explanation": "Step-by-step solution or detailed reasoning with all working shown. This helps teachers verify answer correctness during review.",
   "diagram_needed": true or false,
-  "diagram_description": "Detailed description if diagram needed, else null",
-  "hints": ["Hint 1 for students", "Hint 2 for students"],
-  "prerequisites": ["Knowledge point 1", "Knowledge point 2"],
-  "common_mistakes": ["Common error 1", "Common error 2"],
-  {quality_score_field}
+  "diagram_description": "Detailed description if diagram needed, else null"
 }}
 
 Field Requirements:
 - "question_text": String, the complete question
 - "options": Array of 4 strings for MCQ (format: "A) text", "B) text", etc.), or null for other formats
 - "correct_answer": String ("A", "B", "C", or "D") for MCQ, or null for other formats
-- "explanation": String, detailed solution with all steps
+- "explanation": String, detailed solution with all steps - essential for teacher verification during Human-in-Loop review
 - "diagram_needed": Boolean, true if diagram required
 - "diagram_description": String (detailed) or null
-- "hints": Array of 2-3 helpful hints
-- "prerequisites": Array of 2-3 required knowledge points
-- "common_mistakes": Array of 2-3 typical student errors
-{quality_score_field_desc}
 
 Generate a question that effectively assesses {bloom_level} level understanding of {topic} while maintaining CBSE standards and pedagogical quality.
 """
 
 
-def build_few_shot_section(question_format: str) -> str:
-    """Build the few-shot examples section based on format."""
+def build_few_shot_section(question_format: str, subject: str = "", class_level: int = 10) -> str:
+    """Build the few-shot examples section based on format, subject, and class.
+
+    Args:
+        question_format: The question format (MCQ, VERY_SHORT, SHORT, LONG, etc.)
+        subject: Subject name (e.g., "mathematics", "science")
+        class_level: Class number (e.g., 10)
+
+    Returns:
+        Formatted few-shot examples section string
+    """
+    examples_by_format = get_examples_for_subject(subject, class_level)
+
     examples = []
 
     # Always include the requested format example
-    if question_format == "MCQ":
-        examples.append(MCQ_EXAMPLE)
-    elif question_format == "VERY_SHORT":
-        examples.append(VERY_SHORT_EXAMPLE)
-    elif question_format == "SHORT":
-        examples.append(SHORT_EXAMPLE)
-    elif question_format == "LONG":
-        examples.append(LONG_EXAMPLE)
+    primary_example = examples_by_format.get(question_format.upper())
+    if primary_example:
+        examples.append(primary_example)
     else:
-        # Default to MCQ if unknown
-        examples.append(MCQ_EXAMPLE)
+        # Fallback to MCQ if format not found
+        examples.append(examples_by_format.get("MCQ", ""))
 
     # Add one contrasting example to show variety
-    if question_format != "MCQ":
-        examples.append(MCQ_EXAMPLE)
+    if question_format.upper() != "MCQ":
+        examples.append(examples_by_format.get("MCQ", ""))
     else:
-        examples.append(SHORT_EXAMPLE)
+        examples.append(examples_by_format.get("SHORT", examples_by_format.get("SA", "")))
 
     return "\n=== FEW-SHOT EXAMPLES ===\n" + "\n".join(examples)
 
@@ -282,7 +180,6 @@ def build_generation_prompt(
     chunks: list,
     blueprint_context: dict,
     include_examples: bool = True,
-    include_quality_score: bool = True,
 ) -> str:
     """Build the complete generation prompt.
 
@@ -290,7 +187,6 @@ def build_generation_prompt(
         chunks: Retrieved textbook chunks
         blueprint_context: Blueprint specifications
         include_examples: Whether to include few-shot examples
-        include_quality_score: Whether to request quality score
 
     Returns:
         Complete prompt string
@@ -305,22 +201,16 @@ def build_generation_prompt(
 
     # Build few-shot section
     if include_examples:
-        few_shot_section = build_few_shot_section(blueprint_context.get("question_format", "MCQ"))
+        few_shot_section = build_few_shot_section(
+            question_format=blueprint_context.get("question_format", "MCQ"),
+            subject=blueprint_context.get("subject", ""),
+            class_level=blueprint_context.get("class_level", 10),
+        )
     else:
         few_shot_section = ""
 
     # Get format instructions
     format_instructions = get_format_instructions(blueprint_context.get("question_format", "MCQ"))
-
-    # Configure quality score field
-    if include_quality_score:
-        quality_score_field = '"quality_score": 0.0-1.0,'
-        quality_score_field_desc = (
-            '- "quality_score": Number between 0.0-1.0 (self-assessment of quality)'
-        )
-    else:
-        quality_score_field = ""
-        quality_score_field_desc = ""
 
     # Configure options/correct_answer fields based on format
     question_format = blueprint_context.get("question_format", "MCQ")
@@ -333,7 +223,7 @@ def build_generation_prompt(
 
     # Fill in the template
     prompt = CBSE_QUESTION_GENERATION_PROMPT.format(
-        class_level=blueprint_context.get("class_level","" ),
+        class_level=blueprint_context.get("class_level", ""),
         subject=blueprint_context.get("subject", ""),
         chapter=blueprint_context.get("chapter", ""),
         topic=blueprint_context.get("topic", ""),
@@ -348,8 +238,6 @@ def build_generation_prompt(
         format_instructions=format_instructions,
         options_field=options_field,
         correct_answer_field=correct_answer_field,
-        quality_score_field=quality_score_field,
-        quality_score_field_desc=quality_score_field_desc,
     )
 
     return prompt

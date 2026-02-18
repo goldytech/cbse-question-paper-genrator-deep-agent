@@ -8,14 +8,11 @@ from typing import Any, Dict, List
 
 from langchain_core.tools import tool
 
-from cbse_question_retriever.diagram_detector import diagram_detector
-from cbse_question_retriever.llm_client import llm_client
-from cbse_question_retriever.prompt_templates import build_generation_prompt
-from cbse_question_retriever.response_parser import (
-    parse_llm_response,
-    validate_question_quality,
-)
-from cbse_question_retriever.settings import settings
+from .diagram_detector import diagram_detector
+from .llm_client import llm_client
+from .prompt_templates import build_generation_prompt
+
+from .settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -59,13 +56,9 @@ def generate_llm_question_tool(
         - question_text: Generated question text
         - options: List of 4 options for MCQ, null for others
         - correct_answer: "A"/"B"/"C"/"D" for MCQ, null for others
-        - explanation: Step-by-step solution
+        - explanation: Step-by-step solution for teacher verification
         - diagram_needed: Boolean indicating diagram requirement
         - diagram_description: Detailed description if diagram needed
-        - hints: List of helpful hints for students
-        - prerequisites: List of required knowledge
-        - common_mistakes: List of typical errors
-        - quality_score: Self-assessed quality score (if enabled)
         - generation_metadata: Technical details
         - error: Error message if generation failed, else None
 
@@ -133,18 +126,14 @@ def generate_llm_question_tool(
 
         # Step 1: Build generation prompt
         include_examples = settings.llm.few_shot_examples_enabled
-        include_quality = settings.llm.quality_check_enabled
 
         prompt = build_generation_prompt(
             chunks=chunks,
             blueprint_context=blueprint_context,
             include_examples=include_examples,
-            include_quality_score=include_quality,
         )
 
-        logger.debug(
-            f"Generation prompt built (examples={include_examples}, quality={include_quality})"
-        )
+        logger.debug(f"Generation prompt built (examples={include_examples})")
 
         # Step 2: Generate question using LLM with structured output
         try:
@@ -189,8 +178,7 @@ def generate_llm_question_tool(
             "max_tokens": settings.llm.max_tokens,
             "chunks_used": len(chunks),
             "few_shot_enabled": include_examples,
-            "quality_check_enabled": include_quality,
-            "quality_valid": is_valid,
+            "validation_passed": is_valid,
         }
         question_data["error"] = None
 
@@ -235,10 +223,6 @@ def create_error_response(
         "explanation": f"Error during generation: {error_message}",
         "diagram_needed": False,
         "diagram_description": None,
-        "hints": [],
-        "prerequisites": [],
-        "common_mistakes": [],
-        "quality_score": None,
         "generation_metadata": {
             "model": settings.llm.model,
             "temperature": settings.llm.temperature,
@@ -249,3 +233,35 @@ def create_error_response(
         "error": error_message,
         "error_phase": error_phase,
     }
+
+
+def validate_question_quality(question_data: Dict[str, Any]) -> bool:
+    """Validate that generated question meets minimum quality standards.
+
+    Args:
+        question_data: Parsed question dictionary from structured output
+
+    Returns:
+        True if question meets quality standards
+    """
+    # Check minimum requirements
+    if not question_data.get("question_text"):
+        logger.warning("Question failed validation: missing question_text")
+        return False
+
+    if len(question_data["question_text"]) < 10:
+        logger.warning("Question failed validation: question_text too short")
+        return False
+
+    # For MCQ, check options and answer
+    if question_data.get("options") is not None:
+        if not question_data.get("correct_answer"):
+            logger.warning("MCQ failed validation: missing correct_answer")
+            return False
+
+    # Check explanation
+    if not question_data.get("explanation"):
+        logger.warning("Question failed validation: missing explanation")
+        return False
+
+    return True

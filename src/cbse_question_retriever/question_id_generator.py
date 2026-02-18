@@ -2,7 +2,7 @@
 
 import logging
 
-from cbse_question_retriever.data_types import (
+from .data_types import (
     CHAPTER_ABBREVIATIONS,
     FORMAT_ABBREVIATIONS,
     SUBJECT_ABBREVIATIONS,

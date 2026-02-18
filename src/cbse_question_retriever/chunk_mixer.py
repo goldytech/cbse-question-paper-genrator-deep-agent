@@ -3,7 +3,7 @@
 import logging
 from typing import Dict, List
 
-from cbse_question_retriever.data_types import Chunk, ChunkMixConfig, ChunkType, CHUNK_MIX_CONFIGS
+from .data_types import Chunk, ChunkMixConfig, ChunkType, CHUNK_MIX_CONFIGS
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class ChunkMixer:
             Mixed and ranked list of chunks
         """
         # Get mixing configuration for this format
-        from cbse_question_retriever.data_types import QuestionFormat
+        from .data_types import QuestionFormat
 
         format_enum = QuestionFormat(question_format.upper())
         config = CHUNK_MIX_CONFIGS.get(

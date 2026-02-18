@@ -6,8 +6,8 @@ Uses gpt-5-mini to determine if a question requires a diagram.
 import logging
 from typing import Any, Dict
 
-from cbse_question_retriever.llm_client import llm_client
-from cbse_question_retriever.prompt_templates import DIAGRAM_DETECTION_PROMPT
+from .llm_client import llm_client
+from .prompt_templates import DIAGRAM_DETECTION_PROMPT
 
 logger = logging.getLogger(__name__)
 

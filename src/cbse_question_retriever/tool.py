@@ -8,8 +8,8 @@ from typing import Any, Dict
 
 from langchain_core.tools import tool
 
-from cbse_question_retriever.retriever import retriever
-from cbse_question_retriever.data_types import RetrievedData
+from .retriever import retriever
+from .data_types import RetrievedData
 
 logger = logging.getLogger(__name__)
 

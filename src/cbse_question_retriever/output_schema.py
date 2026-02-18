@@ -13,6 +13,9 @@ class QuestionOutput(BaseModel):
 
     This model ensures the LLM returns properly structured JSON
     that can be directly parsed without manual repair.
+
+    Optimized for CBSE exam paper generation - includes only fields
+    necessary for teacher review and answer key verification.
     """
 
     question_text: str = Field(
@@ -34,7 +37,7 @@ class QuestionOutput(BaseModel):
 
     explanation: str = Field(
         ...,
-        description="Step-by-step solution or detailed reasoning with all working shown",
+        description="Step-by-step solution or detailed reasoning with all working shown. This helps teachers quickly verify answer correctness during review without manually solving each question.",
         min_length=10,
     )
 
@@ -48,31 +51,6 @@ class QuestionOutput(BaseModel):
         description="Detailed description of what should be drawn if diagram is needed",
     )
 
-    hints: List[str] = Field(
-        ...,
-        description="2-3 helpful hints for students to solve the question",
-        min_length=1,
-    )
-
-    prerequisites: List[str] = Field(
-        ...,
-        description="2-3 required knowledge points students should know before attempting",
-        min_length=1,
-    )
-
-    common_mistakes: List[str] = Field(
-        ...,
-        description="2-3 typical student errors or misconceptions for this question",
-        min_length=1,
-    )
-
-    quality_score: Optional[float] = Field(
-        None,
-        description="Self-assessed quality score from 0.0 to 1.0 based on clarity, accuracy, and pedagogy",
-        ge=0.0,
-        le=1.0,
-    )
-
     class Config:
         json_schema_extra = {
             "example": {
@@ -82,9 +60,5 @@ class QuestionOutput(BaseModel):
                 "explanation": "To find the zero of a polynomial, set p(x) = 0. Therefore: x - 3 = 0 → x = 3. The zero is 3.",
                 "diagram_needed": False,
                 "diagram_description": None,
-                "hints": ["Set the polynomial equal to zero", "Solve for x"],
-                "prerequisites": ["Understanding polynomial zeros", "Basic equation solving"],
-                "common_mistakes": ["Confusing zero with coefficient", "Sign errors"],
-                "quality_score": 0.95,
             }
         }
