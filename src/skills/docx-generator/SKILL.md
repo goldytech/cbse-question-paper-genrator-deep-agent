@@ -1,40 +1,32 @@
+---
+name: docx-generator
+description: Converts CBSE question papers from JSON format to DOCX documents with CBSE-compliant formatting, internal choice questions, case study sub-parts, and embedded diagrams. Use this skill AFTER the question paper is approved and ready for document generation.
+metadata:
+  version: "2.0"
+  author: CBSE Question Paper Generator
+---
+
 # DOCX Generator Skill
 
 ## Overview
 
-This skill is responsible for converting CBSE question papers from JSON format to Microsoft Word (DOCX) documents with proper CBSE formatting, embedded diagrams, and professional layout.
+This skill converts CBSE question papers from JSON format to Microsoft Word (DOCX) documents with proper CBSE formatting, embedded diagrams, and professional layout. It handles CBSE-compliant headers, internal choice questions (OR format), case study sub-parts, sequential numbering, and diagram embedding.
 
-## Key Features
+## When to Use
 
-### 1. CBSE Format Compliance
-- **Header**: CENTRAL BOARD OF SECONDARY EDUCATION, Subject (Class), Exam Type, Time, Max Marks
-- **General Instructions**: CBSE-standard instructions for all sections
-- **Section Headers**: Format "SECTION X", Title, marks calculation (count × marks = total)
-- **Question Formatting**: Sequential numbering (Q1, Q2, Q3...) across all sections
+**Use this skill ONLY AFTER** the teacher has approved the JSON question paper with "yes". This is the final step in the workflow that creates the printable examination document.
 
-### 2. Internal Choice Questions (OR Format)
-- Sections B, C, D: Internal choice in last 2 questions per CBSE standard
-- Format: "Q21. [question text] (marks)" followed by centered "OR" and alternative question
-- Alternative questions share the same question number
+## Input Format
 
-### 3. Case Study Questions (Section E)
-- Format: Main passage followed by sub-parts (i), (ii), (iii)
-- Default marks distribution: (i) 1 mark, (ii) 1 mark, (iii) 2 marks
-- Supports custom sub-questions with marks from JSON
+### Input Parameters
 
-### 4. MCQ Options (Dict Format)
-- Accepts new streamlined schema: `{"A": "option text", "B": "option text"}`
-- Format: Indented options with "A) text", "B) text", "C) text", "D) text"
-- Supports 4 options per CBSE standard
+| Parameter | Type | Required | Description | Example |
+|-----------|------|----------|-------------|---------|
+| `json_paper_path` | str | Yes | Path to the approved JSON question paper file | `"output/mathematics_class10_first_term_20260115_143052_a7f3d.json"` |
+| `output_docx_path` | str | Optional | Custom output path for DOCX file. Auto-generated if not provided | `"output/docx/my_paper.docx"` |
 
-### 5. Diagram Embedding
-- Converts SVG diagrams to PNG using cairosvg
-- Embeds diagrams in DOCX with figure captions
-- Cleanup of temporary PNG files after generation
+### Input JSON Structure
 
-## File Format
-
-### Input: JSON Question Paper
 ```json
 {
   "exam_metadata": {
@@ -57,11 +49,12 @@ This skill is responsible for converting CBSE question papers from JSON format t
           "marks": 1,
           "options": {
             "A": "36",
-            "B": "72", 
+            "B": "72",
             "C": "6",
             "D": "24"
           },
-          "internal_choice": false
+          "internal_choice": false,
+          "has_diagram": false
         }
       ]
     }
@@ -70,70 +63,125 @@ This skill is responsible for converting CBSE question papers from JSON format t
 }
 ```
 
-### Output: DOCX File
-- CBSE-compliant header with exam information
-- General instructions section
-- Sequential question numbering
-- Proper formatting for MCQs, internal choices, case studies
-- Embedded diagrams with captions
-- Footer with generation timestamp
-
 ## Tools
 
-### generate_docx_tool
-```python
-generate_docx_tool(
-    json_paper_path: str,           # Path to JSON question paper
-    output_docx_path: Optional[str] = None  # Optional custom output path
-) -> Dict[str, Any]
+### Tool 1: generate_docx_tool
+
+**Purpose**: Convert JSON question paper to DOCX format with CBSE-compliant formatting and embedded diagrams.
+
+**Input Parameters**:
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `json_paper_path` | str | Yes | Path to the JSON question paper file |
+| `output_docx_path` | Optional[str] | No | Custom output path (auto-generated if omitted) |
+
+**Return Format**:
+
+```json
+{
+  "success": true,
+  "docx_path": "output/docx/mathematics_class10_first_term_20260206_150301_a7f3d.docx",
+  "questions_count": 23,
+  "diagrams_embedded": 5,
+  "generation_time": "2026-02-06T15:03:01",
+  "error": null
+}
 ```
 
-**Returns**:
-- `success`: bool
-- `docx_path`: Path to generated DOCX file
-- `questions_count`: Total questions in paper
-- `diagrams_embedded`: Number of diagrams converted
-- `generation_time`: ISO timestamp
-- `error`: Error message if failed
+**Return Fields**:
 
-## Usage
+| Field | Type | Description |
+|-------|------|-------------|
+| `success` | bool | Whether DOCX generation succeeded |
+| `docx_path` | str | Absolute path to generated DOCX file |
+| `questions_count` | int | Total questions in the paper |
+| `diagrams_embedded` | int | Number of diagrams successfully embedded |
+| `generation_time` | str | ISO timestamp of generation |
+| `error` | str/null | Error message if generation failed |
 
-### Basic Usage
-```python
-from docx_generation.tool import generate_docx_tool
+**Error Response**:
 
-result = generate_docx_tool(
-    json_paper_path="output/mathematics_class10_first_term_20260115_143052_a7f3d.json"
-)
-
-if result["success"]:
-    print(f"DOCX generated: {result['docx_path']}")
-    print(f"Questions: {result['questions_count']}")
-    print(f"Diagrams embedded: {result['diagrams_embedded']}")
+```json
+{
+  "success": false,
+  "docx_path": null,
+  "questions_count": 0,
+  "diagrams_embedded": 0,
+  "generation_time": "2026-02-06T15:03:01",
+  "error": "JSON file not found: output/paper.json"
+}
 ```
 
-### Custom Output Path
-```python
-result = generate_docx_tool(
-    json_paper_path="output/paper.json",
-    output_docx_path="my_exam_paper.docx"
-)
+## CBSE Format Features
+
+### Header Format
+Creates CBSE-compliant header with:
+- CENTRAL BOARD OF SECONDARY EDUCATION
+- Subject (Class) - e.g., "MATHEMATICS (Class 10)"
+- Exam Type - e.g., "FIRST TERM EXAMINATION"
+- Time and Max Marks - e.g., "TIME: 3 HOURS    MAX. MARKS: 80"
+
+### General Instructions
+Standard CBSE instructions including:
+- Section counts and question types
+- Marks per section
+- Internal choice information
+- Calculator and figure guidelines
+
+### Section Headers
+Format: **SECTION X** (centered, bold)
+Subtitle: Section title (italic)
+Marks: (count × marks = total marks)
+
+### Question Formatting
+
+**Sequential Numbering**: Questions numbered Q1, Q2, Q3... across all sections continuously
+
+**MCQ Format**:
 ```
+1. Question text (1 mark)
+   A) option text
+   B) option text
+   C) option text
+   D) option text
+```
+
+**Internal Choice (OR Format)**: For Sections B, C, D (last 2 questions)
+```
+21. Question text (2 marks)
+    OR
+    Alternative question text (2 marks)
+```
+
+**Case Study (Section E)**: With sub-parts (i), (ii), (iii)
+```
+36. Case study passage text...
+    (i) (1 mark)
+    (ii) (1 mark)
+    (iii) (2 marks)
+```
+
+### CBSE Section Configuration
+
+| Section | Title | Marks/Question |
+|---------|-------|----------------|
+| A | Multiple Choice Questions | 1 |
+| B | Very Short Answer Questions | 2 |
+| C | Short Answer Questions | 3 |
+| D | Long Answer Questions | 5 |
+| E | Case Study Based Questions | 4 |
 
 ## Helper Functions
 
 ### _create_cbse_header(doc, metadata)
-Creates CBSE-style document header with:
-- CBSE board name
-- Subject and class
-- Exam type
-- Time and marks
+Creates CBSE-style document header.
 
 ### _create_cbse_general_instructions(doc, num_sections)
-Adds CBSE general instructions with section counts.
+Adds CBSE general instructions.
 
 ### _format_mcq_options(options, doc)
-Formats MCQ options in CBSE style with proper indentation.
+Formats MCQ options in CBSE style with indentation.
 
 ### _format_internal_choice(question, doc, q_num, q_marks)
 Formats internal choice questions with "OR" separator.
@@ -144,54 +192,86 @@ Formats case study questions with sub-parts.
 ### _svg_base64_to_png(svg_base64, width)
 Converts base64 SVG diagrams to PNG for embedding.
 
-### _generate_docx_filename(metadata)
-Generates unique DOCX filenames with timestamps.
+## Examples
 
-## CBSE Section Configuration
-
+### Example 1: Basic Usage
 ```python
-CBSE_SECTIONS = {
-    "A": {"title": "Multiple Choice Questions", "marks_per_question": 1},
-    "B": {"title": "Very Short Answer Questions", "marks_per_question": 2},
-    "C": {"title": "Short Answer Questions", "marks_per_question": 3},
-    "D": {"title": "Long Answer Questions", "marks_per_question": 5},
-    "E": {"title": "Case Study Based Questions", "marks_per_question": 4},
+result = task(
+    name="docx-generator",
+    task="Generate DOCX from: output/mathematics_class10_first_term_20260206_143052_a7f3d.json"
+)
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "docx_path": "output/docx/mathematics_class10_first_term_20260206_150301_a7f3d.docx",
+  "questions_count": 23,
+  "diagrams_embedded": 5,
+  "generation_time": "2026-02-06T15:03:01"
 }
 ```
 
-## Dependencies
+### Example 2: With Custom Output Path
+```python
+result = task(
+    name="docx-generator",
+    task="Generate DOCX from: output/paper.json to: output/docx/my_exam.docx"
+)
+```
 
-### Required
-- `python-docx`: DOCX document generation
-- `cairosvg`: SVG to PNG conversion (optional but recommended)
-- `langchain_core`: Tool decorators
+### Example 3: Error Handling
+```python
+result = task(
+    name="docx-generator",
+    task="Generate DOCX from: output/nonexistent.json"
+)
+```
 
-### Installation
-```bash
-pip install python-docx cairosvg
+**Response**:
+```json
+{
+  "success": false,
+  "error": "JSON file not found: output/nonexistent.json",
+  "questions_count": 0,
+  "diagrams_embedded": 0,
+  "generation_time": "2026-02-06T15:03:01"
+}
 ```
 
 ## Error Handling
 
-### Missing SVG Support
-If cairosvg is not installed:
-- Warning is printed
-- DOCX is still generated but without diagrams
-- Document remains valid and usable
+### Missing JSON File
+Returns error if input file not found:
+```json
+{
+  "success": false,
+  "error": "JSON file not found: {path}"
+}
+```
 
 ### Invalid JSON
-Returns error if input file not found or invalid JSON.
+Returns error with parsing details if JSON is malformed.
+
+### Missing cairosvg
+If cairosvg not installed:
+- Warning printed
+- DOCX still generated without diagrams
+- Document remains valid and usable
 
 ### Missing Required Fields
-Gracefully handles missing optional fields with defaults.
+Gracefully handles missing optional fields with defaults:
+- Missing metadata → Uses empty dict defaults
+- Missing marks → Uses section default
+- Missing options → Skips MCQ formatting
 
 ## File Locations
 
 ### Input
 ```
-input/classes/{class}/{subject}/
-├── blueprint.json
-└── input_{exam_name}.json
+output/
+└── {subject}_class{class}_{exam_type}_YYYYMMDD_HHMMSS_{short_id}.json
 ```
 
 ### Output
@@ -206,32 +286,48 @@ src/cache/temp/
 └── [temporary PNG files for diagrams]
 ```
 
-## Version History
+## Dependencies
 
-### v2.0 (Current)
-- Added CBSE format compliance
-- Support for internal choice questions (OR format)
-- Case study sub-parts formatting
-- Dict format options (streamlined schema)
-- Embedded diagram support
-- Sequential question numbering
+### Required
+- `python-docx`: DOCX document generation
+- `langchain_core`: Tool decorators
 
-### v1.0
-- Basic DOCX generation
-- Simple question formatting
-- Array format options
+### Optional
+- `cairosvg`: SVG to PNG conversion (recommended for diagrams)
+
+### Installation
+```bash
+pip install python-docx cairosvg
+```
+
+## Implementation Status
+
+✅ **Fully Implemented**
+
+- CBSE-compliant header with exam metadata
+- General instructions section
+- Sequential question numbering across all sections
+- MCQ formatting with dict format options
+- Internal choice questions (OR format) for Sections B, C, D
+- Case study sub-parts (i), (ii), (iii) for Section E
+- Diagram embedding with SVG to PNG conversion
+- Automatic filename generation with timestamps
+- Error handling and validation
 
 ## Best Practices
 
-1. **Verify JSON Structure**: Ensure input JSON follows the expected schema
-2. **Check Diagrams**: SVG diagrams should be valid base64-encoded
-3. **Metadata Completeness**: Include all required exam metadata fields
-4. **Internal Choices**: Mark questions with `internal_choice: true` for OR format
-5. **Case Studies**: Use `has_sub_questions: true` and provide `sub_questions` array
-6. **Question IDs**: Keep unique question IDs for tracking
+1. **Teacher Approval**: Only generate DOCX after teacher approves JSON with "yes"
+2. **Verify JSON**: Ensure input JSON follows the expected schema
+3. **Check Diagrams**: SVG diagrams should be valid base64-encoded
+4. **Metadata Completeness**: Include all required exam metadata fields
+5. **Internal Choices**: Mark questions with `internal_choice: true` for OR format
+6. **Case Studies**: Use `has_sub_questions: true` and provide `sub_questions` array
+7. **Question IDs**: Keep unique question IDs for tracking and debugging
+8. **File Paths**: Use absolute paths for reliability
 
-## Example Output Structure
+## Output Example
 
+Generated DOCX structure:
 ```
 CENTRAL BOARD OF SECONDARY EDUCATION
 MATHEMATICS (Class 10)
@@ -253,39 +349,20 @@ Multiple Choice Questions
    C) 6
    D) 24
 
-2. [Next question]...
-
 SECTION B
 Very Short Answer Questions
 (5 × 2 = 10 marks)
 
 21. Question text here (2 marks)
-   OR
-   Alternative question here (2 marks)
+    OR
+    Alternative question here (2 marks)
 
 SECTION E
 Case Study Based Questions
 (3 × 4 = 12 marks)
 
 36. Case study passage text...
-   (i) (1 mark)
-   (ii) (1 mark)
-   (iii) (2 marks)
+    (i) (1 mark)
+    (ii) (1 mark)
+    (iii) (2 marks)
 ```
-
-## Troubleshooting
-
-### Diagrams Not Showing
-- Ensure cairosvg is installed: `pip install cairosvg`
-- Check SVG is valid base64
-- Verify PNG conversion works
-
-### Formatting Issues
-- Check question_format field is set correctly
-- Ensure options are in dict format for MCQs
-- Verify marks field is present
-
-### File Not Found
-- Verify input JSON path is correct
-- Check file permissions
-- Ensure parent directories exist
