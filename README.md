@@ -6,6 +6,23 @@ An intelligent agent system for generating CBSE (Central Board of Secondary Educ
 
 This system generates high-quality, CBSE-compliant question papers through an intelligent workflow that combines AI generation with teacher oversight. It uses a multi-agent architecture where specialized subagents handle validation, research, verification, diagram generation, and DOCX export while the main agent coordinates the process.
 
+## Recent Updates
+
+### v2.0 (Latest) - Streamlined Schema & CBSE Compliance
+- **Streamlined Question Schema**: Removed hints, prerequisites, common_mistakes, quality_score; added internal_choice, choice_text
+- **Dict Format Options**: MCQ options now use `{"A": "text", "B": "text"}` format instead of array
+- **Sequential Numbering**: Questions numbered Q1, Q2, Q3... continuously across all sections
+- **Internal Choice Support**: OR format questions in Sections B, C, D per CBSE standard
+- **Case Study Sub-parts**: Format (i), (ii), (iii) for Section E questions
+- **Updated Subagents**: question-assembler and docx-generator fully support new schema
+
+### v1.0 - Initial Release
+- Multi-agent architecture with five specialized subagents
+- Two-tier question generation (Qdrant retrieval + gpt-5-mini)
+- Auto-diagram generation and embedding
+- DOCX export with embedded images
+- Human-in-the-Loop teacher approval
+
 ## Key Features
 
 ### 🤖 Multi-Agent Architecture
@@ -13,15 +30,17 @@ This system generates high-quality, CBSE-compliant question papers through an in
 - **input-file-locator**: Locates and validates teacher's input blueprint JSON
 - **blueprint-validator**: Validates blueprint against master policy blueprints (two-blueprint validation)
 - **cbse-question-retriever**: **NEW** - Two-tier system: retrieves chunks from Qdrant vector DB, then generates questions using gpt-5-mini
-- **question-assembler**: Assembles and formats final questions
-- **paper-validator**: Validates final paper against blueprint
-- **docx-generator**: Generates professional DOCX documents with embedded images
+- **question-assembler**: **UPDATED** - Compiles sections with sequential numbering, internal choices, and CBSE formatting
+- **docx-generator**: **UPDATED** - Generates professional DOCX documents with CBSE formatting, embedded images, and internal choice questions
 
 ### 🎯 Intelligent Question Generation
 - **Retrieves content from Qdrant vector database**: Stores CBSE textbook chunks with embeddings (text-embedding-3-large)
 - **Generates questions using gpt-5-mini**: Detailed prompting with few-shot examples, Bloom's taxonomy, and CBSE standards
 - **Hybrid search**: Combines vector similarity with metadata filters (chapter, topic)
 - **Fuzzy topic matching**: Handles variations in topic names using rapidfuzz
+- **Streamlined schema**: Question objects use dict format options and compact structure for efficiency
+- **Sequential numbering**: Questions numbered continuously across sections (Q1, Q2, Q3...)
+- **Section compilation**: Internal choice handling and case study sub-parts
 - Maintains CBSE difficulty distribution (40% easy, 40% medium, 20% hard)
 - Follows official CBSE question formats and standards
 - **🎨 Auto-generates diagrams** for geometry, coordinate geometry, trigonometry, and statistics questions
@@ -125,24 +144,27 @@ This system generates high-quality, CBSE-compliant question papers through an in
        └─ Creates SVG with drawsvg
        └─ Stores base64 for JSON portability
        └─ Adds structured diagram description
-    g. Return complete question with:
-       └─ Options, correct_answer, explanation, hints
-       └─ Prerequisites, common_mistakes, quality_score
+     g. Return complete question with streamlined schema:
+        └─ Options (dict format: {"A": "text", "B": "text"})
+        └─ Explanation, correct_answer, diagram data
+     ↓
+ 5. Assemble & Compile Paper (question-assembler subagent)
+    └─ Sequential numbering across all sections (Q1, Q2, Q3...)
+    └─ Compile sections with internal choices (OR format)
+    └─ Format case studies with sub-parts (i), (ii), (iii)
+    └─ Convert options from array to dict format
     ↓
-5. Compile Paper
-   ↓
-6. Validate Paper (paper-validator subagent)
-   ↓
-7. HITL: Show Formatted Preview to Teacher (with diagram descriptions)
-   ↓
-8. Teacher Decision:
-    ├─ YES → Generate DOCX (docx-generator subagent)
-    │    ├─ Convert SVG → PNG (cairosvg)
-    │    ├─ Embed images in DOCX (python-docx)
-    │    └─ Save to output/docx/
-    └─ NO  → Capture feedback → Go to step 4 (rework)
+ 6. HITL: Show Formatted Preview to Teacher (with diagram descriptions)
     ↓
-9. Complete
+ 7. Teacher Decision:
+     ├─ YES → Generate DOCX (docx-generator subagent)
+     │    ├─ Convert SVG → PNG (cairosvg)
+     │    ├─ Embed images in DOCX (python-docx)
+     │    ├─ Apply CBSE headers and formatting
+     │    └─ Save to output/docx/
+     └─ NO  → Capture feedback → Go to step 4 (rework)
+     ↓
+ 8. Complete
 ```
 
 ### Human-in-the-Loop (HITL) Details
@@ -428,7 +450,7 @@ mathematics_class10_first_term_20260201_143052_a7f3d.json
 mathematics_class10_first_term_20260201_143052_a7f3d.docx
 ```
 
-### Question Object Structure (With Diagram Support)
+### Question Object Structure (Streamlined Schema v2.0)
 
 ```json
 {
@@ -438,14 +460,30 @@ mathematics_class10_first_term_20260201_143052_a7f3d.docx
   "topic": "LCM HCF",
   "question_format": "MCQ",
   "marks": 1,
-  "options": ["A) 40", "B) 60", "C) 80", "D) 100"],
+  "options": {
+    "A": "40",
+    "B": "60",
+    "C": "80",
+    "D": "100"
+  },
   "correct_answer": "B",
   "difficulty": "easy",
   "bloom_level": "apply",
-  "tags": ["lcm hcf", "real numbers"],
-  "has_diagram": false
+  "nature": "NUMERICAL",
+  "explanation": "Step-by-step solution...",
+  "diagram_needed": false,
+  "has_diagram": false,
+  "internal_choice": false
 }
 ```
+
+**Key Changes in v2.0**:
+- **Options**: Dict format `{"A": "text", "B": "text"}` instead of array
+- **Removed fields**: hints, prerequisites, common_mistakes, quality_score
+- **New fields**: internal_choice, choice_text, has_sub_questions, sub_questions
+- **Sequential numbering**: Global question numbers across sections
+- **Internal choice support**: OR format questions in Sections B, C, D
+- **Case study support**: Sub-parts (i), (ii), (iii) in Section E
 
 **Question with Diagram**:
 ```json
@@ -458,16 +496,32 @@ mathematics_class10_first_term_20260201_143052_a7f3d.docx
   "marks": 5,
   "difficulty": "easy",
   "bloom_level": "apply",
+  "nature": "NUMERICAL",
+  "explanation": "Step-by-step solution using Pythagoras theorem...",
+  "diagram_needed": true,
   "has_diagram": true,
-  "diagram_type": "geometric",
   "diagram_svg_base64": "PHN2Zy...",
   "diagram_description": "Right-angled triangle ABC with right angle at vertex B...",
-  "diagram_elements": {
-    "shape": "right_triangle",
-    "points": ["A", "B", "C"],
-    "sides": ["AB=5", "BC=12", "AC=?"],
-    "angles": ["∠B=90°"]
-  }
+  "internal_choice": false
+}
+```
+
+**Internal Choice Question (OR Format)**:
+```json
+{
+  "question_id": "MATH-10-ALG-SA-021",
+  "question_text": "Solve the quadratic equation x² - 5x + 6 = 0.",
+  "chapter": "Algebra",
+  "topic": "Quadratic Equations",
+  "question_format": "SHORT",
+  "marks": 3,
+  "difficulty": "medium",
+  "bloom_level": "apply",
+  "nature": "NUMERICAL",
+  "explanation": "Solution using factorization...",
+  "internal_choice": true,
+  "choice_text": "Solve x² - 7x + 12 = 0.",
+  "has_diagram": false
 }
 ```
 
@@ -478,26 +532,37 @@ question-paper-generator-agent/
 ├── run.py                          # Main entry point
 ├── AGENTS.md                       # Agent behavior & instructions
 ├── README.md                       # This file
+├── src/                            # Source code
+│   ├── input_file_locator/         # Input file locator subagent
+│   │   └── tool.py
+│   ├── blueprint_validator/        # Blueprint validator subagent
+│   │   └── tool.py
+│   ├── cbse_question_retriever/    # Question retriever (two-tier)
+│   │   ├── tool.py
+│   │   ├── llm_question_generator.py
+│   │   └── output_schema.py
+│   ├── question_assembler/         # Question assembler subagent
+│   │   └── tool.py
+│   ├── docx_generation/            # DOCX generator subagent
+│   │   └── tool.py
+│   ├── diagram_generation/         # Diagram generation
+│   │   └── tool.py
+│   ├── skills/                     # Domain knowledge
+│   │   ├── input-file-locator/
+│   │   │   └── SKILL.md
+│   │   ├── blueprint-validator/
+│   │   │   └── SKILL.md
+│   │   ├── cbse-question-retriever/
+│   │   │   └── SKILL.md
+│   │   ├── question-assembler/
+│   │   │   └── SKILL.md
+│   │   └── docx-generator/
+│   │       └── SKILL.md
+│   └── output/                     # Generated papers
+│       └── docx/                   # DOCX files
 ├── config/
 │   └── agent_config.py            # Subagent definitions
-├── tools/                          # Custom tools
-│   ├── blueprint_validator.py     # Blueprint validation
-│   ├── curriculum_searcher.py     # Tavily search integration
-│   ├── diagram_generator.py      # NEW: SVG diagram generation
-│   ├── docx_generator.py         # NEW: DOCX export
-│   └── paper_validator.py         # Paper validation
-├── skills/                         # Domain knowledge
-│   └── cbse/
-│       ├── common/                # Shared standards
-│       │   ├── QUESTION_FORMATS.json
-│       │   ├── QUALITY_GUIDELINES.md
-│       │   └── DIFFICULTY_DISTRIBUTION.md
-│       └── class_10/
-│           └── mathematics/
-│               ├── SKILL.md            # Includes diagram patterns
-│               └── references/
-├── display/                        # UI components
-│   └── agent_display.py           # Live display & HITL
+├── tools/                          # Legacy tools (deprecated)
 ├── input/                          # Blueprint files
 │   └── classes/
 │       └── 10/
@@ -506,10 +571,10 @@ question-paper-generator-agent/
 │               └── input_first_term_50.json   # Teacher file
 ├── output/                         # Generated papers
 │   ├── *.json                     # Question papers
-│   └── docx/                      # NEW: Generated DOCX files
-├── cache/                          # NEW: Cache directories
+│   └── docx/                      # DOCX files
+├── cache/                          # Cache directories
 │   ├── diagrams/                  # Diagram SVG cache
-│   └── temp/                       # Temp PNG for DOCX conversion
+│   └── temp/                       # Temp PNG for DOCX
 └── .env                           # API keys (not in git)
 ```
 
@@ -542,16 +607,20 @@ Human-in-the-Loop is configured in `config/agent_config.py`:
 
 ### Subagent Configuration
 
-Six subagents are configured:
+Five subagents are configured:
 
 1. **input-file-locator**: Locates and validates teacher's input blueprint JSON files
 2. **blueprint-validator**: Validates exam blueprint against master policy blueprints (two-blueprint validation)
 3. **cbse-question-retriever**: **NEW** - Two-tier system:
    - Step 1: Retrieves chunks from Qdrant vector database using hybrid search
    - Step 2: Generates questions using gpt-5-mini with few-shot examples and quality checks
-4. **question-assembler**: Assembles and formats final CBSE-compliant questions
-5. **paper-validator**: Validates final paper against blueprint
-6. **docx-generator**: Converts JSON papers to DOCX with embedded images
+4. **question-assembler**: **NEW** - Assembles and formats final CBSE-compliant questions:
+   - Sequential numbering across all sections (Q1, Q2, Q3...)
+   - Internal choice questions (OR format) for Sections B, C, D
+   - Case study sub-parts (i), (ii), (iii) for Section E
+   - Dict format options conversion
+   - Section compilation with proper CBSE formatting
+5. **docx-generator**: Converts JSON papers to DOCX with embedded images and CBSE formatting
 
 ## Diagram Generation Features
 
@@ -695,11 +764,69 @@ To modify how diagrams are generated:
 2. Update diagram generation logic for new diagram types
 3. Add new drawsvg patterns in `skills/cbse/class_10/mathematics/SKILL.md`
 
+### Customizing Question Assembly
+
+To modify how questions are assembled and formatted:
+
+1. Edit `src/question_assembler/tool.py` for assembly logic
+2. Update `src/skills/question-assembler/SKILL.md` for documentation
+3. Modify section compilation rules for different formats
+
 ### Customizing DOCX Output
 
 To modify DOCX formatting:
 
-1. Edit `tools/docx_generator.py` for styling changes
+1. Edit `src/docx_generation/tool.py` for styling changes
+2. Update CBSE header/footer templates
+3. Modify section formatting and question numbering logic
+4. Add custom styling options
+
+## Question Assembler Features
+
+### Sequential Numbering
+Questions are numbered sequentially across all sections (Q1, Q2, Q3...) instead of restarting in each section.
+
+### Internal Choice Questions
+Sections B, C, D include internal choice in the last 2 questions per CBSE standard:
+```
+21. Question text here (2 marks)
+    OR
+    Alternative question text (2 marks)
+```
+
+### Case Study Questions
+Section E questions include sub-parts with marks:
+```
+36. Case study passage text...
+    (i) (1 mark)
+    (ii) (1 mark)
+    (iii) (2 marks)
+```
+
+### Dict Format Options
+MCQ options are stored and displayed in dict format:
+```json
+{
+  "A": "36",
+  "B": "72",
+  "C": "6",
+  "D": "24"
+}
+```
+
+### Streamlined Schema v2.0
+- **Removed**: hints, prerequisites, common_mistakes, quality_score
+- **Added**: internal_choice, choice_text, has_sub_questions, sub_questions
+- **Focus**: Essential fields only for efficient storage and processing
+
+### Customizing DOCX Output
+
+To modify DOCX formatting:
+
+1. Edit `src/docx_generation/tool.py` for styling changes
+2. Update CBSE header/footer templates
+3. Modify section formatting and question numbering logic
+4. Add custom styling options
 2. Update header/footer templates
 3. Modify section formatting logic
 4. Add custom styling options
