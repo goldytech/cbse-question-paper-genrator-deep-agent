@@ -1,173 +1,291 @@
----
-name: docx-generator
-description: Converts approved JSON question papers to DOCX format with embedded diagrams. Use ONLY AFTER teacher approves the JSON question paper with "yes".
-metadata:
-  version: "1.0"
-  author: CBSE Question Paper Generator
----
-
-# DOCX Generation Skill
+# DOCX Generator Skill
 
 ## Overview
 
-This skill converts approved JSON question papers into professionally formatted DOCX documents suitable for printing and distribution to students.
+This skill is responsible for converting CBSE question papers from JSON format to Microsoft Word (DOCX) documents with proper CBSE formatting, embedded diagrams, and professional layout.
 
-## When to Use
+## Key Features
 
-**ONLY use this skill AFTER the teacher has explicitly approved the JSON question paper with "yes".**
+### 1. CBSE Format Compliance
+- **Header**: CENTRAL BOARD OF SECONDARY EDUCATION, Subject (Class), Exam Type, Time, Max Marks
+- **General Instructions**: CBSE-standard instructions for all sections
+- **Section Headers**: Format "SECTION X", Title, marks calculation (count × marks = total)
+- **Question Formatting**: Sequential numbering (Q1, Q2, Q3...) across all sections
 
-Do NOT generate DOCX:
-- Before teacher approval
-- For preview/staging files
-- If the paper has validation errors
+### 2. Internal Choice Questions (OR Format)
+- Sections B, C, D: Internal choice in last 2 questions per CBSE standard
+- Format: "Q21. [question text] (marks)" followed by centered "OR" and alternative question
+- Alternative questions share the same question number
 
-## Input Format
+### 3. Case Study Questions (Section E)
+- Format: Main passage followed by sub-parts (i), (ii), (iii)
+- Default marks distribution: (i) 1 mark, (ii) 1 mark, (iii) 2 marks
+- Supports custom sub-questions with marks from JSON
 
-You will receive:
-- `paper_path`: Path to the approved JSON question paper
-- `output_path`: (Optional) Custom output path for DOCX file
+### 4. MCQ Options (Dict Format)
+- Accepts new streamlined schema: `{"A": "option text", "B": "option text"}`
+- Format: Indented options with "A) text", "B) text", "C) text", "D) text"
+- Supports 4 options per CBSE standard
 
-## Output Format
+### 5. Diagram Embedding
+- Converts SVG diagrams to PNG using cairosvg
+- Embeds diagrams in DOCX with figure captions
+- Cleanup of temporary PNG files after generation
 
-Return JSON:
+## File Format
+
+### Input: JSON Question Paper
 ```json
 {
-  "success": true|false,
-  "docx_path": "output/docx/mathematics_class10_first_term_20260206_150301_a7f3d.docx",
-  "questions_count": 20,
-  "diagrams_embedded": 8,
-  "generation_time": "2026-02-06T15:03:01"
+  "exam_metadata": {
+    "subject": "Mathematics",
+    "class": 10,
+    "exam_type": "First Term Examination",
+    "total_marks": 80,
+    "duration_minutes": 180
+  },
+  "sections": [
+    {
+      "section_id": "A",
+      "title": "Multiple Choice Questions",
+      "marks_per_question": 1,
+      "questions": [
+        {
+          "question_id": "MATH-10-REA-MCQ-001",
+          "question_text": "Find the LCM of 12 and 18",
+          "question_format": "MCQ",
+          "marks": 1,
+          "options": {
+            "A": "36",
+            "B": "72", 
+            "C": "6",
+            "D": "24"
+          },
+          "internal_choice": false
+        }
+      ]
+    }
+  ],
+  "total_marks": 80
 }
 ```
 
-## Process
+### Output: DOCX File
+- CBSE-compliant header with exam information
+- General instructions section
+- Sequential question numbering
+- Proper formatting for MCQs, internal choices, case studies
+- Embedded diagrams with captions
+- Footer with generation timestamp
 
-1. **Validate Input**
-   - Check that paper_path exists and is valid JSON
-   - Verify paper has been approved (look for approval indicator)
+## Tools
 
-2. **Read JSON Paper**
-   - Load the question paper structure
-   - Extract metadata (subject, class, exam type, total marks)
-
-3. **Create DOCX Structure**
-
-### Header (Each Page)
-```
-CBSE | CENTRAL BOARD OF SECONDARY EDUCATION
-MATHEMATICS (Class 10)
-FIRST TERM
-TIME: 2 hours MAX.MARKS: 50
+### generate_docx_tool
+```python
+generate_docx_tool(
+    json_paper_path: str,           # Path to JSON question paper
+    output_docx_path: Optional[str] = None  # Optional custom output path
+) -> Dict[str, Any]
 ```
 
-### Body Structure
+**Returns**:
+- `success`: bool
+- `docx_path`: Path to generated DOCX file
+- `questions_count`: Total questions in paper
+- `diagrams_embedded`: Number of diagrams converted
+- `generation_time`: ISO timestamp
+- `error`: Error message if failed
 
-**General Instructions:**
-1. This Question Paper consists of 5 Sections A, B, C, D and E.
-2. All questions are compulsory.
-3. Draw neat and clean figures wherever required.
-4. Use of calculators is not allowed.
-...
+## Usage
 
-**Section A: Multiple Choice Questions (10 × 1 = 10 marks)**
-1. [Question text with MCQ options]
-   [Embedded diagram if applicable]
+### Basic Usage
+```python
+from docx_generation.tool import generate_docx_tool
 
-2. [Question text with MCQ options]
-   [Embedded diagram if applicable]
+result = generate_docx_tool(
+    json_paper_path="output/mathematics_class10_first_term_20260115_143052_a7f3d.json"
+)
 
-**Section B: Short Answer Questions (5 × 3 = 15 marks)**
-1. [Question text]
-   [Embedded diagram if applicable]
-   [Answer space provided]
-
-### Footer (Each Page)
-```
-CBSE Question Paper Generator | Generated: {timestamp}
+if result["success"]:
+    print(f"DOCX generated: {result['docx_path']}")
+    print(f"Questions: {result['questions_count']}")
+    print(f"Diagrams embedded: {result['diagrams_embedded']}")
 ```
 
-4. **Embed Diagrams**
-   - For each question with `has_diagram: true`:
-     - Locate SVG file using `diagram_key`
-     - Convert SVG to PNG if needed
-     - Embed in document at appropriate position
-     - Ensure diagrams are clear and properly sized
-
-5. **Format and Style**
-   - Apply CBSE-standard formatting
-   - Set proper margins and spacing
-   - Use consistent fonts (Times New Roman or Arial)
-   - Ensure proper page breaks between sections
-
-6. **Save DOCX File**
-   - Generate filename using convention (see below)
-   - Save to `output/docx/` directory
-   - Verify file was created successfully
-
-## Document Structure Details
-
-### Header Format
-- Line 1: "CBSE | CENTRAL BOARD OF SECONDARY EDUCATION" (centered, bold)
-- Line 2: "{SUBJECT} (Class {class})" (centered)
-- Line 3: "{EXAM_TYPE}" (centered, uppercase)
-- Line 4: "TIME: {duration} MAX.MARKS: {total_marks}" (centered)
-
-### Question Formatting
-
-**MCQ Questions:**
-- Question number and text
-- Options labeled A, B, C, D on separate lines
-- Diagram embedded after question text (if applicable)
-
-**Short/Long Answer:**
-- Question number and text
-- Diagram embedded (if applicable)
-- Adequate space for student answer
-
-### Footer Format
-- "CBSE Question Paper Generator | Generated: {timestamp}" (centered, small font)
-- Page numbers (optional)
-
-## Filename Convention
-
-```
-{subject}_class{class}_{exam}_YYYYMMDD_HHMMSS_{id}.docx
-
-Example:
-mathematics_class10_first_term_20260206_150301_a7f3d.docx
+### Custom Output Path
+```python
+result = generate_docx_tool(
+    json_paper_path="output/paper.json",
+    output_docx_path="my_exam_paper.docx"
+)
 ```
 
-Components:
-- `subject`: Subject name from blueprint (lowercase, spaces→underscores)
-- `class`: Class number from blueprint (e.g., "class10")
-- `exam`: From JSON exam_type
-- `YYYYMMDD_HHMMSS`: Timestamp
-- `id`: First 5 chars of UUID
+## Helper Functions
 
-Storage location: `output/docx/`
+### _create_cbse_header(doc, metadata)
+Creates CBSE-style document header with:
+- CBSE board name
+- Subject and class
+- Exam type
+- Time and marks
+
+### _create_cbse_general_instructions(doc, num_sections)
+Adds CBSE general instructions with section counts.
+
+### _format_mcq_options(options, doc)
+Formats MCQ options in CBSE style with proper indentation.
+
+### _format_internal_choice(question, doc, q_num, q_marks)
+Formats internal choice questions with "OR" separator.
+
+### _format_case_study_question(question, doc, q_num, q_marks)
+Formats case study questions with sub-parts.
+
+### _svg_base64_to_png(svg_base64, width)
+Converts base64 SVG diagrams to PNG for embedding.
+
+### _generate_docx_filename(metadata)
+Generates unique DOCX filenames with timestamps.
+
+## CBSE Section Configuration
+
+```python
+CBSE_SECTIONS = {
+    "A": {"title": "Multiple Choice Questions", "marks_per_question": 1},
+    "B": {"title": "Very Short Answer Questions", "marks_per_question": 2},
+    "C": {"title": "Short Answer Questions", "marks_per_question": 3},
+    "D": {"title": "Long Answer Questions", "marks_per_question": 5},
+    "E": {"title": "Case Study Based Questions", "marks_per_question": 4},
+}
+```
+
+## Dependencies
+
+### Required
+- `python-docx`: DOCX document generation
+- `cairosvg`: SVG to PNG conversion (optional but recommended)
+- `langchain_core`: Tool decorators
+
+### Installation
+```bash
+pip install python-docx cairosvg
+```
 
 ## Error Handling
 
-- **Paper not found**: Return error with file path
-- **Invalid JSON**: Return error with parsing details
-- **Diagram missing**: Warning, continue without diagram
-- **Permission error**: Return error, suggest checking output directory permissions
+### Missing SVG Support
+If cairosvg is not installed:
+- Warning is printed
+- DOCX is still generated but without diagrams
+- Document remains valid and usable
 
-## Quality Checklist
+### Invalid JSON
+Returns error if input file not found or invalid JSON.
 
-Before returning success:
-- [ ] DOCX file created successfully
-- [ ] File is readable (not corrupted)
-- [ ] All questions included
-- [ ] All diagrams embedded correctly
-- [ ] Header and footer present
-- [ ] Formatting consistent
-- [ ] Filename follows convention
+### Missing Required Fields
+Gracefully handles missing optional fields with defaults.
+
+## File Locations
+
+### Input
+```
+input/classes/{class}/{subject}/
+├── blueprint.json
+└── input_{exam_name}.json
+```
+
+### Output
+```
+src/output/docx/
+└── {subject}_class{class}_{exam_type}_YYYYMMDD_HHMMSS_{short_id}.docx
+```
+
+### Cache (Temporary)
+```
+src/cache/temp/
+└── [temporary PNG files for diagrams]
+```
+
+## Version History
+
+### v2.0 (Current)
+- Added CBSE format compliance
+- Support for internal choice questions (OR format)
+- Case study sub-parts formatting
+- Dict format options (streamlined schema)
+- Embedded diagram support
+- Sequential question numbering
+
+### v1.0
+- Basic DOCX generation
+- Simple question formatting
+- Array format options
 
 ## Best Practices
 
-- Always verify teacher approval before generating
-- Use default output path unless specified
-- Handle missing diagrams gracefully (continue generation)
-- Ensure professional formatting suitable for exams
-- Test DOCX opens correctly before marking success
+1. **Verify JSON Structure**: Ensure input JSON follows the expected schema
+2. **Check Diagrams**: SVG diagrams should be valid base64-encoded
+3. **Metadata Completeness**: Include all required exam metadata fields
+4. **Internal Choices**: Mark questions with `internal_choice: true` for OR format
+5. **Case Studies**: Use `has_sub_questions: true` and provide `sub_questions` array
+6. **Question IDs**: Keep unique question IDs for tracking
+
+## Example Output Structure
+
+```
+CENTRAL BOARD OF SECONDARY EDUCATION
+MATHEMATICS (Class 10)
+FIRST TERM EXAMINATION
+TIME: 3 HOURS          MAX. MARKS: 80
+
+General Instructions:
+1. This Question Paper consists of 5 Sections A, B, C, D and E.
+2. Section A has 20 MCQs carrying 1 mark each.
+...
+
+SECTION A
+Multiple Choice Questions
+(20 × 1 = 20 marks)
+
+1. Find the LCM of 12 and 18 (1 mark)
+   A) 36
+   B) 72
+   C) 6
+   D) 24
+
+2. [Next question]...
+
+SECTION B
+Very Short Answer Questions
+(5 × 2 = 10 marks)
+
+21. Question text here (2 marks)
+   OR
+   Alternative question here (2 marks)
+
+SECTION E
+Case Study Based Questions
+(3 × 4 = 12 marks)
+
+36. Case study passage text...
+   (i) (1 mark)
+   (ii) (1 mark)
+   (iii) (2 marks)
+```
+
+## Troubleshooting
+
+### Diagrams Not Showing
+- Ensure cairosvg is installed: `pip install cairosvg`
+- Check SVG is valid base64
+- Verify PNG conversion works
+
+### Formatting Issues
+- Check question_format field is set correctly
+- Ensure options are in dict format for MCQs
+- Verify marks field is present
+
+### File Not Found
+- Verify input JSON path is correct
+- Check file permissions
+- Ensure parent directories exist
