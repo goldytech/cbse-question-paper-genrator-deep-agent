@@ -6,23 +6,6 @@ An intelligent agent system for generating CBSE (Central Board of Secondary Educ
 
 This system generates high-quality, CBSE-compliant question papers through an intelligent workflow that combines AI generation with teacher oversight. It uses a multi-agent architecture where specialized subagents handle validation, research, verification, diagram generation, and DOCX export while the main agent coordinates the process.
 
-## Recent Updates
-
-### v2.0 (Latest) - Streamlined Schema & CBSE Compliance
-- **Streamlined Question Schema**: Removed hints, prerequisites, common_mistakes, quality_score; added internal_choice, choice_text
-- **Dict Format Options**: MCQ options now use `{"A": "text", "B": "text"}` format instead of array
-- **Sequential Numbering**: Questions numbered Q1, Q2, Q3... continuously across all sections
-- **Internal Choice Support**: OR format questions in Sections B, C, D per CBSE standard
-- **Case Study Sub-parts**: Format (i), (ii), (iii) for Section E questions
-- **Updated Subagents**: question-assembler and docx-generator fully support new schema
-
-### v1.0 - Initial Release
-- Multi-agent architecture with five specialized subagents
-- Two-tier question generation (Qdrant retrieval + gpt-5-mini)
-- Auto-diagram generation and embedding
-- DOCX export with embedded images
-- Human-in-the-Loop teacher approval
-
 ## Key Features
 
 ### 🤖 Multi-Agent Architecture
