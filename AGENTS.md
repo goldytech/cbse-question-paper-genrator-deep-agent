@@ -18,6 +18,30 @@ You are the **Main Agent (Orchestrator)**. You coordinate the entire workflow us
 
 ---
 
+## Input Folder Structure
+
+All blueprint files are organized under `input/classes/` following this pattern:
+
+```
+input/classes/{class}/{subject}/
+├── blueprint.json              # Master blueprint (system default)
+└── input_{exam_name}.json      # Teacher input files (priority)
+```
+
+**Pattern variables**:
+- `{class}`: Class number (1-12)
+- `{subject}`: Subject name (e.g., "mathematics", "science", "english", "social_science", "hindi", "sanskrit")
+- `{exam_name}`: Exam identifier (e.g., "first_term", "second_term", "final_exam")
+
+**Priority Rule**: Teacher files (`input_*.json`) override master blueprints (`blueprint.json`)
+
+**Examples**:
+- `input/classes/10/mathematics/input_first_term.json`
+- `input/classes/9/science/blueprint.json`
+- `input/classes/12/english/input_final_exam.json`
+
+---
+
 ## Subagent Architecture
 
 You have access to 6 specialized subagents. Each has specific tools and responsibilities:
@@ -30,11 +54,11 @@ You have access to 6 specialized subagents. Each has specific tools and responsi
 **How to invoke**:
 ```
 task(name="input-file-locator", 
-     task="Locate blueprint from: 'Generate class 10 mathematics paper from input/classes/10/mathematics/first.json'")
+     task="Locate blueprint from: 'Generate class {class} {subject} paper from input/classes/{class}/{subject}/{blueprint_file}'")
 ```
 
 **Behavior**:
-- **Explicit path**: If teacher provides path (e.g., `input/classes/10/mathematics/first.json`), validates and returns it
+- **Explicit path**: If teacher provides path (e.g., `input/classes/{class}/{subject}/{blueprint_file}.json`), validates and returns it
 - **Auto-discovery**: If no path provided, searches `input/classes/{class}/{subject}/` for JSON files
 - **Priority**: Teacher files (`input_*.json`) override master blueprints (`blueprint.json`)
 - **Selection**: Most recent file by modification timestamp
@@ -43,11 +67,11 @@ task(name="input-file-locator",
 **Example Return**:
 ```json
 {
-  "file_path": "input/classes/10/mathematics/first.json",
+  "file_path": "input/classes/{class}/{subject}/{blueprint_file}.json",
   "found": true,
   "is_teacher_file": true,
   "auto_discovered": false,
-  "class": 10,
+  "class": {class},
   "subject": "mathematics"
 }
 ```
@@ -61,11 +85,11 @@ task(name="input-file-locator",
 
 **How to invoke**:
 ```
-task(name="blueprint-validator", task="Validate exam blueprint at path: input/classes/10/mathematics/first.json")
+task(name="blueprint-validator", task="Validate exam blueprint at path: input/classes/{class}/{subject}/{blueprint_file}.json")
 ```
 
 **Two-Blueprint Validation**:
-- **Exam Blueprint**: Teacher-provided file (e.g., `input/classes/10/mathematics/input_first_term_50.json`) containing exam specifications
+- **Exam Blueprint**: Teacher-provided file (e.g., `input/classes/{class}/{subject}/input_{exam_name}.json`) containing exam specifications
 - **Master Policy Blueprint**: Auto-discovered at `skills/{class}/{subject}/references/blueprint.json` containing validation rules
 - Validator checks exam blueprint against master policy rules
 
@@ -110,11 +134,11 @@ task(name="blueprint-validator", task="Validate exam blueprint at path: input/cl
 ```
 Step 1 - Retrieve chunks:
 task(name="cbse-question-retriever", 
-     task="Retrieve chunks for: blueprint_path=input/classes/10/mathematics/first.json, section_id=A, question_number=1")
+     task="Retrieve chunks for: blueprint_path=input/classes/{class}/{subject}/{blueprint_file}.json, section_id={section}, question_number={number}")
 
 Step 2 - Generate question:
 task(name="cbse-question-retriever",
-     task="Generate question using chunks: {chunks}, blueprint_context: {context}, question_id=MATH-10-POL-MCQ-001")
+     task="Generate question using chunks: {chunks}, blueprint_context: {context}, question_id={SUBJECT_ABBR}-{CLASS}-{CHAPTER_ABBR}-{FORMAT_ABBR}-{NUM}")
 ```
 
 **Two-Tier Process**:
@@ -138,68 +162,62 @@ task(name="cbse-question-retriever",
 3. Calls gpt-5-mini (temperature=0.3) via LangChain
 4. Parses JSON response with validation
 5. Auto-detects diagram need using separate LLM call
-6. Returns: complete question with options, explanation, hints, prerequisites
+6. Returns: complete question with streamlined schema (question_text, options, correct_answer, explanation, diagram_needed, diagram_description)
 
 **Example Return** (MCQ without diagram):
 ```json
 {
-  "question_id": "MATH-10-POL-MCQ-001",
-  "question_text": "Find the zeroes of the polynomial x² - 5x + 6",
-  "chapter": "Polynomials",
-  "topic": "Zeros",
+  "question_id": "{SUBJECT_ABBR}-{CLASS}-{CHAPTER_ABBR}-{FORMAT_ABBR}-{NUM}",
+  "question_text": "[Question text for {topic} in {chapter}]",
+  "chapter": "{chapter}",
+  "topic": "{topic}",
   "question_format": "MCQ",
   "marks": 1,
-  "options": ["A) 2, 3", "B) 1, 6", "C) -2, -3", "D) -1, -6"],
+  "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
   "correct_answer": "A",
   "difficulty": "easy",
   "bloom_level": "REMEMBER",
   "nature": "NUMERICAL",
   "diagram_needed": false,
   "diagram_description": null,
-  "explanation": "To find zeroes, solve x² - 5x + 6 = 0. Factorizing: (x-2)(x-3) = 0. Therefore, x = 2 or x = 3.",
-  "hints": ["Set the polynomial equal to zero", "Factor the quadratic"],
-  "prerequisites": ["Understanding of polynomial zeros", "Factorization"],
-  "common_mistakes": ["Confusing zeroes with coefficients", "Sign errors"],
-  "quality_score": 0.95,
+  "explanation": "[Step-by-step solution with all working shown]",
   "generation_metadata": {
     "model": "gpt-5-mini",
     "temperature": 0.3,
     "chunks_used": 3,
     "few_shot_enabled": true,
-    "quality_check_enabled": true
+    "validation_passed": true
   },
-  "error": null
+  "error": null,
+  "error_phase": null
 }
 ```
 
 **Example Return** (LONG with diagram):
 ```json
 {
-  "question_id": "MATH-10-TRI-LA-001",
-  "question_text": "In a right-angled triangle ABC, AB = 5 cm, BC = 12 cm, and ∠B = 90°. Find the length of AC and prove it satisfies Pythagoras theorem.",
-  "chapter": "Triangles",
-  "topic": "Pythagoras Theorem",
+  "question_id": "{SUBJECT_ABBR}-{CLASS}-{CHAPTER_ABBR}-{FORMAT_ABBR}-{NUM}",
+  "question_text": "[Question text requiring multi-step solution]",
+  "chapter": "{chapter}",
+  "topic": "{topic}",
   "question_format": "LONG",
   "marks": 5,
   "difficulty": "easy",
   "bloom_level": "APPLY",
   "nature": "DERIVATION",
   "diagram_needed": true,
-  "diagram_description": "Right-angled triangle ABC with right angle at vertex B. Side AB extends vertically (5 cm), side BC extends horizontally (12 cm). Hypotenuse AC connects A to C diagonally.",
-  "explanation": "Given: Right-angled triangle ABC with ∠B = 90°, AB = 5 cm, BC = 12 cm.\nUsing Pythagoras theorem: AC² = AB² + BC²\nAC² = 5² + 12² = 25 + 144 = 169\nAC = √169 = 13 cm.\nVerification: 5² + 12² = 13² → 25 + 144 = 169 ✓",
+  "diagram_description": "[Detailed description of diagram to be drawn]",
+  "explanation": "[Step-by-step solution with all working shown]",
   "options": null,
   "correct_answer": null,
-  "hints": ["Apply Pythagoras theorem: AC² = AB² + BC²", "Calculate square root of sum"],
-  "prerequisites": ["Pythagoras theorem", "Square roots", "Right-angled triangles"],
-  "common_mistakes": ["Adding sides instead of squaring", "Calculation errors"],
-  "quality_score": 0.96,
   "generation_metadata": {
     "model": "gpt-5-mini",
     "temperature": 0.3,
     "chunks_used": 5,
-    "diagram_type": "geometric"
+    "validation_passed": true
   },
-  "error": null
+  "error": null,
+  "error_phase": null
 }
 ```
 
@@ -218,7 +236,7 @@ task(name="cbse-question-retriever",
 **How to invoke**:
 ```
 task(name="question-assembler", 
-     task="Assemble question: {generated_question}, Requirements: Class=10, Chapter=Polynomials, Format=MCQ, Marks=1")
+     task="Assemble question: {generated_question}, Requirements: Class={class}, Chapter={chapter}, Format={format}, Marks={marks}")
 ```
 
 **What it does**:
@@ -240,7 +258,7 @@ task(name="question-assembler",
 **How to invoke**:
 ```
 task(name="paper-validator", 
-     task="Validate paper at output/question_paper.json against blueprint at input/classes/10/mathematics/first.json")
+     task="Validate paper at output/{subject}_class{class}_{exam}_YYYYMMDD_HHMMSS_{id}.json against blueprint at input/classes/{class}/{subject}/{blueprint_file}.json")
 ```
 
 **Example Return**:
@@ -315,7 +333,7 @@ When a teacher provides a prompt (e.g. "Generate Class 10 Mathematics question p
 ### Step 1: Locate Input Blueprint (DELEGATE)
 ```
 task(name="input-file-locator", 
-     task="Locate blueprint from: 'Generate class 10 mathematics paper from input/classes/10/mathematics/first.json'")
+     task="Locate blueprint from: 'Generate class {class} {subject} paper from input/classes/{class}/{subject}/{blueprint_file}'")
 ```
 
 The input-file-locator subagent will:
@@ -327,13 +345,9 @@ The input-file-locator subagent will:
 **Expected Folder Structure:**
 ```
 input/classes/
-├── 10/mathematics/
+├── {class}/{subject}/
 │   ├── blueprint.json              # Master blueprint (system default)
-│   └── input_first_term_50.json    # Teacher file (input_ prefix, overrides master)
-├── 10/science/
-│   └── blueprint.json
-└── 9/mathematics/
-    └── blueprint.json
+│   └── input_{exam_name}.json    # Teacher file (input_ prefix, overrides master)
 ```
 
 **Your Action**:
@@ -406,8 +420,18 @@ task(name="cbse-question-retriever",
   "difficulty": "easy",
   "bloom_level": "apply",
   "nature": "NUMERICAL",
-  "has_diagram": false,
-  "chunks_used": 2
+  "explanation": "To find LCM of 12 and 18:\n12 = 2² × 3\n18 = 2 × 3²\nLCM = 2² × 3² = 4 × 9 = 36",
+  "diagram_needed": false,
+  "diagram_description": null,
+  "generation_metadata": {
+    "model": "gpt-5-mini",
+    "temperature": 0.3,
+    "chunks_used": 2,
+    "few_shot_enabled": true,
+    "validation_passed": true
+  },
+  "error": null,
+  "error_phase": null
 }
 ```
 
@@ -570,8 +594,18 @@ task(name="cbse-question-retriever",
   "difficulty": "easy",
   "bloom_level": "apply",
   "nature": "NUMERICAL",
-  "has_diagram": false,
-  "chunks_used": 2
+  "explanation": "To find LCM of 12 and 18:\\n12 = 2² × 3\\n18 = 2 × 3²\\nLCM = 2² × 3² = 4 × 9 = 36",
+  "diagram_needed": false,
+  "diagram_description": null,
+  "generation_metadata": {
+    "model": "gpt-5-mini",
+    "temperature": 0.3,
+    "chunks_used": 2,
+    "few_shot_enabled": true,
+    "validation_passed": true
+  },
+  "error": null,
+  "error_phase": null
 }
 ```
 
@@ -592,7 +626,7 @@ Repeat for all questions...
 ### 8. Validate Paper
 ```
 task(name="paper-validator", 
-     task="Validate paper at output/question_paper.json against input/classes/10/mathematics/blueprint.json")
+     task="Validate paper at output/mathematics_class10_first_term_YYYYMMDD_HHMMSS_{id}.json against input/classes/10/mathematics/blueprint.json")
 ```
 
 **Response**:
@@ -626,10 +660,10 @@ task(name="paper-validator",
 - Format mathematical expressions clearly
 
 ### Question IDs
-Format: `[SUBJECT-CLASS-CHAPTER-FORMAT-NUM]`
-- Example: `MATH-10-REAL-MCQ-001`, `SCI-10-PHY-SA-002`
+Format: `{SUBJECT_ABBR}-{CLASS}-{CHAPTER_ABBR}-{FORMAT_ABBR}-{NUM}`
+- Examples: `MATH-10-REA-MCQ-001`, `SCI-09-PHYS-SA-001`, `ENG-12-LIT-LA-001`
 
-Chapter abbreviations:
+Chapter abbreviations (examples for Mathematics):
 - REA: Real Numbers
 - POL: Polynomials
 - LIN: Linear Equations
@@ -641,6 +675,8 @@ Chapter abbreviations:
 - MEN: Mensuration
 - STA: Statistics
 - PRO: Probability
+
+Similar abbreviations exist for other subjects in `src/cbse_question_retriever/data_types.py`
 
 ---
 
