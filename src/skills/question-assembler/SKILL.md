@@ -1,410 +1,318 @@
 ---
-name: question-assembly
-description: Assembles CBSE-compliant questions from search results. Use when creating final question objects from retrieved educational content.
+name: question-assembler
+description: Assembles CBSE-compliant questions from retrieved textbook chunks and LLM-generated content. Supports both single question assembly and section compilation with CBSE format.
 metadata:
-  version: "1.0"
+  version: "2.0"
   author: CBSE Question Paper Generator
 ---
 
-# Question Assembly Skill
+# Question Assembler Skill
 
 ## Overview
-This skill assembles complete CBSE question objects from search results and blueprint requirements. It handles question formatting, difficulty assessment, diagram detection, and quality validation.
 
-> **NOTE:** This skill was previously designed to work with Tavily search results. It will be updated for Qdrant vector database results in the next phase.
+This skill assembles CBSE-compliant questions from retrieved textbook chunks and LLM-generated content. It supports both:
+1. **Single Question Assembly**: Individual question creation with diagram detection
+2. **Section Compilation**: Organizing multiple questions into CBSE-formatted sections
+
+**Version 2.0 Changes:**
+- ✅ Streamlined schema (removed hints, prerequisites, common_mistakes, quality_score)
+- ✅ Options format conversion (array → dict)
+- ✅ Sequential numbering across sections
+- ✅ CBSE internal choice rules
+- ✅ Section compilation mode
 
 ## When to Use
-Use this skill when you need to:
-- Create final question objects from search results
-- Format questions according to CBSE standards
-- Generate question IDs and metadata
-- Detect when diagrams are needed
-- Apply difficulty and cognitive level tags
+
+**ALWAYS use this skill after cbse-question-retriever generates questions.**
+
+This skill:
+- Formats questions into CBSE-compliant structure
+- Detects and generates diagrams when needed
+- Converts options to proper format
+- Applies CBSE internal choice rules
+- Compiles sections with proper metadata
 
 ## Input Format
 
-You will receive two inputs:
-
-### 1. Search Results (from vector database)
-```json
-[
-  {
-    "question_text": "...",
-    "metadata": {...},
-    "similarity_score": 0.95
-  }
-]
-```
-
-> **NOTE:** Previous version used 15 items from Tavily web search. This will be replaced with Qdrant vector database results.
-
-### 2. Blueprint Requirements
-```json
-{
-  "class": 10,
-  "subject": "Mathematics",
-  "chapter": "Polynomials",
-  "topic": "Zeros of a Polynomial",
-  "format": "MCQ",
-  "marks": 1,
-  "difficulty": "easy",
-  "nature": "NUMERICAL",
-  "cognitive_level": "REMEMBER"
-}
-```
+You will receive:
+- `retrieval_result`: Result from chunk retrieval (chapter, topic, format, marks, etc.)
+- `llm_result`: Generated question content from LLM
+- `question_number`: Sequential number (1, 2, 3...)
+- `section_config`: (Optional) For section compilation mode
 
 ## Output Format
 
-Return a complete question JSON object:
-
+### Single Question Mode (Streamlined Schema):
 ```json
 {
   "question_id": "MATH-10-POL-MCQ-001",
-  "question_text": "Calculate the least common multiple of 15 and 20",
+  "question_text": "Find the zero of p(x) = x - 3",
+  "section_id": "A",
+  "question_number": 1,
   "chapter": "Polynomials",
   "topic": "Zeros of a Polynomial",
   "question_format": "MCQ",
   "marks": 1,
-  "options": ["A) 40", "B) 60", "C) 80", "D) 100"],
-  "correct_answer": "B",
+  "options": {
+    "A": "3",
+    "B": "-3", 
+    "C": "0",
+    "D": "1"
+  },
+  "correct_answer": "A",
   "difficulty": "easy",
   "bloom_level": "remember",
-  "nature": "NUMERICAL",
+  "nature": "numerical",
   "has_diagram": false,
+  "diagram_needed": false,
+  "diagram_description": null,
   "diagram_type": null,
   "diagram_svg_base64": null,
-  "diagram_description": null,
   "diagram_elements": null,
-  "tags": ["polynomials", "zeros", "numerical", "lcm"]
+  "explanation": "To find the zero, set p(x) = 0...",
+  "internal_choice": false,
+  "choice_text": null,
+  "has_sub_questions": false,
+  "sub_questions": [],
+  "generation_metadata": {...},
+  "status": "success",
+  "error": null,
+  "error_phase": null
 }
 ```
 
-## Question ID Format
+### Section Compilation Mode:
+```json
+{
+  "section_id": "B",
+  "title": "Short Answer Questions",
+  "question_format": "SHORT",
+  "marks_per_question": 2,
+  "questions_provided": 5,
+  "questions_attempt": 5,
+  "section_total_marks": 10,
+  "questions": [...],
+  "internal_choice_available": true,
+  "cbse_format": true
+}
+```
 
-Pattern: `{SUBJECT}-{CLASS}-{CHAPTER}-{FORMAT}-{NUMBER}`
+## Key Features
 
-### Subject Codes
-- MAT: Mathematics
-- SCI: Science
-- ENG: English
-- SST: Social Science
+### 1. Options Format Conversion
+**Input**: Can be either:
+- Array format: `["A) option1", "B) option2", "C) option3", "D) option4"]`
+- Dict format: `{"A": "option1", "B": "option2", ...}`
 
-### Chapter Abbreviations (Mathematics Class 10)
-- REA: Real Numbers
-- POL: Polynomials
-- LIN: Linear Equations
-- QUAD: Quadratic Equations
-- AP: Arithmetic Progressions
-- COG: Coordinate Geometry
-- TRI: Triangles
-- CIR: Circles
-- MEN: Mensuration
-- STA: Statistics
-- PRO: Probability
+**Output**: Always dict format for CBSE compliance and docx-generator compatibility
 
-### Format Abbreviations
-- MCQ: MCQ
-- VSQ: VERY_SHORT
-- SA: SHORT
-- LA: LONG
-- CS: CASE_STUDY
+### 2. Streamlined Schema (v2.0)
 
-### Example IDs
-- `MATH-10-POL-MCQ-001`: Math Class 10, Polynomials, MCQ, #1
-- `MATH-10-TRI-LA-005`: Math Class 10, Triangles, Long Answer, #5
+**Removed Fields** (no longer in output):
+- ❌ `hints`
+- ❌ `prerequisites`
+- ❌ `common_mistakes`
+- ❌ `quality_score`
 
-## Diagram Detection
+**Kept Fields**:
+- ✅ `question_text`
+- ✅ `options` (dict format)
+- ✅ `correct_answer`
+- ✅ `explanation`
+- ✅ `diagram_needed`
+- ✅ `diagram_description`
+- ✅ `has_diagram`
+- ✅ `diagram_svg_base64`
 
-### Auto-Detect Diagram Needs
-Analyze the question content for these keywords:
+**New Fields**:
+- ✅ `internal_choice`: Boolean flag
+- ✅ `choice_text`: "OR" or description
+- ✅ `has_sub_questions`: For case studies
+- ✅ `sub_questions`: Array of sub-parts
 
-**Geometry (diagram_type: "geometric"):**
-- triangle, circle, quadrilateral, polygon
-- angle (∠), vertex, vertices, side
-- radius, diameter, chord, tangent
-- congruence, similarity, Pythagoras
-- perpendicular, parallel, intersecting
+### 3. Diagram Detection & Generation
+Automatically detects if question needs diagram based on:
+- Geometric keywords (triangle, circle, angle, etc.)
+- Coordinate geometry terms (graph, plot, axis, etc.)
+- Chart terms (histogram, bar chart, pie chart, etc.)
 
-**Coordinate Geometry (diagram_type: "coordinate"):**
-- graph, plot, coordinate, axis
-- point, line, slope, intercept
-- distance, midpoint, quadrant
-- x-coordinate, y-coordinate
+Generates SVG diagrams and converts to base64 for embedding.
 
-**Trigonometry (diagram_type: "geometric"):**
-- sin, cos, tan, cot, sec, cosec
-- elevation, depression, height
-- tower, shadow, ladder, pole
-- angle of elevation/depression
+### 4. CBSE Internal Choice Rules
+Applied automatically during section compilation:
 
-**Statistics (diagram_type: "chart"):**
-- histogram, bar chart, pie chart
-- frequency, class interval, ogive
-- data interpretation, graph
+| Section | Internal Choice |
+|---------|----------------|
+| A | None (all compulsory) |
+| B | Last 2 questions (OR) |
+| C | Last 2 questions (OR) |
+| D | Last 2 questions (OR) |
+| E | All questions (Case Study with sub-parts) |
 
-**When Diagram Detected:**
-1. Set `has_diagram: true`
-2. Set appropriate `diagram_type`
-3. Create `diagram_description` (detailed text)
-4. Define `diagram_elements` (structured data)
-5. Generate diagram using `generate_diagram_tool`
+### 5. Sequential Numbering
+Questions are numbered Q1, Q2, Q3... across all sections automatically.
 
-### Diagram Workflow
+## Tools
 
-The complete diagram workflow within question assembly:
+### assemble_question_tool
+Assembles individual questions with streamlined schema.
 
-1. **Analyze Question Content**
-   - Parse the generated question text
-   - Scan for diagram-related keywords (listed above)
-   - Determine if visualization adds value
+**Parameters**:
+- `retrieval_result`: Chunk retrieval result
+- `llm_result`: LLM generation result
+- `question_number`: Sequential number
+- `section_config`: (Optional) Section compilation config
 
-2. **Determine Diagram Type**
-   - **geometric**: For geometry, trigonometry questions
-   - **coordinate**: For graphs, plots, coordinate geometry
-   - **chart**: For statistics, histograms, data representation
-   - **formula**: For complex mathematical expressions
+**Returns**: Assembled question object
 
-3. **Create Diagram Description**
-   - Write detailed textual description of the diagram
-   - Include all elements, labels, and measurements
-   - Make it accessible for screen readers
-   - Example: "Right-angled triangle ABC with right angle at vertex C. Side AC extends vertically for 6 cm, side BC extends horizontally for 8 cm."
+### compile_section_tool
+Compiles multiple questions into CBSE section format.
 
-4. **Define Diagram Elements**
-   - Structure data for diagram generation
-   - Include: shape type, points, sides, angles, coordinates
-   - Example:
-     ```json
-     {
-       "shape": "right_triangle",
-       "points": ["A", "B", "C"],
-       "sides": ["AC=6 cm", "BC=8 cm", "AB=?"],
-       "angles": ["∠C=90°"]
-     }
-     ```
+**Parameters**:
+- `questions`: List of assembled questions
+- `section_id`: "A", "B", "C", "D", or "E"
+- `section_title`: Section title
+- `marks_per_question`: Marks per question
+- `question_format`: Question format type
 
-5. **Generate Diagram**
-   - Call `generate_diagram_tool` with description and elements
-   - Receive SVG base64 and file path
-   - Store reference in question object
+**Returns**: CBSE-formatted section object
 
-### Diagram Storage
+### Helper Functions
 
-- Diagrams are stored as separate SVG files (not embedded in JSON)
-- Location: `src/cache/diagrams/`
-- Each diagram has a unique key based on content hash
-- Questions reference diagrams by key for reuse across papers
-- Diagrams can be reused if same geometry is needed again
+**reset_question_counter()**: Reset counter before new paper generation
 
-### Diagram Quality Standards
-
-All diagrams must meet these standards:
-
-- **Clarity**: Elements clearly visible and properly labeled
-- **Accuracy**: Measurements and positions mathematically correct
-- **Consistency**: Similar diagrams use consistent styling (colors, line thickness, fonts)
-- **Accessibility**: Include descriptive alt-text for screen readers
-- **Professional Quality**: Suitable for CBSE exam papers
-- **Proper Sizing**: Large enough to be readable when printed
-
-## Quality Standards
-
-All questions must meet these CBSE standards:
-
-### ✅ Required
-- **Unambiguous**: Single correct interpretation
-- **Calculator-free**: Numbers workable mentally
-- **CBSE notation**: Standard mathematical notation
-- **Realistic values**: Reasonable numerical values
-- **Time-appropriate**: Fits exam duration
-
-### ❌ Avoid
-- Ambiguous wording
-- Complex calculations requiring calculators
-- Non-standard notation
-- Unrealistic scenarios
-- Excessively long questions for marks allocated
-
-## Cognitive Level Mapping
-
-Map `cognitive_level` to `bloom_level`:
-- REMEMBER → "remember"
-- UNDERSTAND → "understand"
-- APPLY → "apply"
-- ANALYSE → "analyze"
-- EVALUATE → "evaluate"
-- CREATE → "create"
-
-## Format-Specific Requirements
-
-### MCQ (Multiple Choice)
-- Exactly 4 options (A, B, C, D)
-- Format: "A) ...", "B) ...", etc.
-- One clearly correct answer
-- Distractors should be plausible
-
-### VERY_SHORT (1-2 marks)
-- Direct answer expected
-- 1-2 sentences maximum
-- No working required
-
-### SHORT (3 marks)
-- Brief working shown
-- 3-5 steps
-- Clear solution path
-
-### LONG (5 marks)
-- Detailed working required
-- 5+ steps
-- May include proof/derivation
-- Method marks consideration
-
-### CASE_STUDY (4 marks)
-- Real-world scenario
-- 2-4 sub-questions
-- Data/paragraph provided
-- Marks distributed across parts
+**get_next_question_number()**: Get next sequential question number
 
 ## Process
 
-Follow these steps:
+### For Single Question:
+1. **Validate Inputs**: Check retrieval and LLM results
+2. **Generate ID**: Format `SUBJECT-CLASS-CHAPTER-FORMAT-NUM`
+3. **Convert Options**: Array → Dict format
+4. **Detect Diagram**: Rule-based + LLM input
+5. **Generate Diagram**: If needed, create SVG
+6. **Build Question**: Assemble streamlined schema fields
+7. **Return**: Complete question object
 
-1. **Analyze Search Results**
-   - Review all 15 Tavily results
-   - Extract best question concepts
-   - Note common patterns
+### For Section Compilation:
+1. **Assemble All Questions**: Call for each question in section
+2. **Collect Questions**: Build list of assembled questions
+3. **Apply CBSE Rules**: Add internal_choice flags per section rules
+4. **Calculate Marks**: section_total_marks = count × marks_per_question
+5. **Return**: Section object with metadata
 
-2. **Apply Requirements**
-   - Match format (MCQ, SHORT, LONG, etc.)
-   - Apply difficulty level
-   - Target specific marks
-   - Cover required topic
+## CBSE Format Compliance
 
-3. **Create Question Text**
-   - Write clear, unambiguous question
-   - Use CBSE-style language
-   - Include all necessary context
-   - Keep within time constraints
+### Section Structure:
+- **Section A**: MCQs + Assertion Reason (1 mark each)
+- **Section B**: Very Short Answer (2 marks each)
+- **Section C**: Short Answer (3 marks each)
+- **Section D**: Long Answer (5 marks each)
+- **Section E**: Case Study-Based (4 marks with sub-parts)
 
-4. **Generate Metadata**
-   - Create unique question_id
-   - Set chapter and topic
-   - Map cognitive_level to bloom_level
-   - Assign nature and difficulty
+### Question ID Format:
+Pattern: `{SUBJECT}-{CLASS}-{CHAPTER}-{FORMAT}-{NUMBER}`
 
-5. **Create Options/Answers**
-   - For MCQ: 4 options with 1 correct
-   - For others: suggested answer
-   - Ensure clarity
+Examples:
+- `MATH-10-POL-MCQ-001`: Math Class 10, Polynomials, MCQ
+- `MATH-10-TRI-LA-005`: Math Class 10, Triangles, Long Answer
 
-6. **Detect Diagram Needs**
-   - Scan for geometry/coordinate/trig keywords
-   - Set has_diagram flag
-   - Define diagram_type if needed
-   - Call generate_diagram_tool if required
-
-7. **Add Tags**
-   - Include chapter name
-   - Include topic name
-   - Add nature tag
-   - Add relevant keywords
-
-8. **Validate Output**
-   - Check all required fields present
-   - Verify question_id format
-   - Ensure valid JSON
-   - Confirm quality standards met
-
-## Examples
-
-### Example 1: MCQ Question
-
-**Input Requirements:**
+### Internal Choice Format:
 ```json
 {
-  "class": 10,
-  "subject": "Mathematics",
-  "chapter": "Real Numbers",
-  "topic": "LCM and HCF",
-  "format": "MCQ",
-  "marks": 1,
-  "difficulty": "easy",
-  "nature": "NUMERICAL",
-  "cognitive_level": "REMEMBER"
+  "internal_choice": true,
+  "choice_text": "OR",
+  "choice_type": "alternative_question"
 }
 ```
 
-**Output:**
+### Case Study Format (Section E):
 ```json
 {
-  "question_id": "MATH-10-REA-MCQ-001",
-  "question_text": "The LCM of two numbers is 120 and their HCF is 8. If one number is 24, find the other number.",
-  "chapter": "Real Numbers",
-  "topic": "LCM and HCF",
-  "question_format": "MCQ",
-  "marks": 1,
-  "options": ["A) 30", "B) 40", "C) 50", "D) 60"],
-  "correct_answer": "B",
-  "difficulty": "easy",
-  "bloom_level": "remember",
-  "nature": "NUMERICAL",
-  "has_diagram": false,
-  "diagram_type": null,
-  "diagram_svg_base64": null,
-  "diagram_description": null,
-  "diagram_elements": null,
-  "tags": ["real-numbers", "lcm", "hcf", "numerical", "formula"]
+  "has_sub_questions": true,
+  "sub_questions": [
+    {"part": "(i)", "marks": 1},
+    {"part": "(ii)", "marks": 1},
+    {"part": "(iii)", "marks": 2}
+  ],
+  "internal_choice": true,
+  "choice_text": "Case Study based question"
 }
 ```
 
-### Example 2: Long Answer with Diagram
+## Example Workflows
 
-**Input Requirements:**
-```json
-{
-  "class": 10,
-  "subject": "Mathematics",
-  "chapter": "Triangles",
-  "topic": "Pythagoras Theorem",
-  "format": "LONG",
-  "marks": 5,
-  "difficulty": "medium",
-  "nature": "PROOF",
-  "cognitive_level": "UNDERSTAND"
-}
+### Workflow 1: Single Question Assembly
+```python
+result = assemble_question_tool(
+    retrieval_result={
+        "chapter": "Polynomials",
+        "topic": "Zeros",
+        "question_format": "MCQ",
+        "marks": 1,
+        "difficulty": "easy"
+    },
+    llm_result={
+        "question_text": "Find the zero of p(x) = x - 3",
+        "options": ["A) 3", "B) -3", "C) 0", "D) 1"],  # Array input OK
+        "correct_answer": "A",
+        "explanation": "Set p(x) = 0...",
+        "diagram_needed": false
+    },
+    question_number=1
+)
+# Returns: Question with options in dict format {"A": "3", "B": "-3", ...}
 ```
 
-**Output:**
-```json
-{
-  "question_id": "MATH-10-TRI-LA-001",
-  "question_text": "In right-angled triangle ABC, right-angled at C, prove that AB² = AC² + BC². Hence, find the length of the hypotenuse if AC = 6 cm and BC = 8 cm.",
-  "chapter": "Triangles",
-  "topic": "Pythagoras Theorem",
-  "question_format": "LONG",
-  "marks": 5,
-  "options": null,
-  "correct_answer": "10 cm",
-  "difficulty": "medium",
-  "bloom_level": "understand",
-  "nature": "PROOF",
-  "has_diagram": true,
-  "diagram_type": "geometric",
-  "diagram_svg_base64": "...",
-  "diagram_description": "Right-angled triangle ABC with right angle at vertex C. Side AC is vertical (6 cm), side BC is horizontal (8 cm), and AB is the hypotenuse.",
-  "diagram_elements": {
-    "shape": "right_triangle",
-    "points": ["A", "B", "C"],
-    "sides": ["AC=6 cm", "BC=8 cm", "AB=?"],
-    "angles": ["∠C=90°"]
-  },
-  "tags": ["triangles", "pythagoras", "proof", "right-angle", "geometric"]
-}
+### Workflow 2: Section Compilation
+```python
+# First: Reset counter for new paper
+reset_question_counter()
+
+# Collect questions for Section B
+questions = []
+for i in range(5):
+    q = assemble_question_tool(retrieval, llm_result, get_next_question_number())
+    questions.append(q)
+
+# Compile into section
+section_b = compile_section_tool(
+    questions=questions,
+    section_id="B",
+    section_title="Short Answer Questions",
+    marks_per_question=2,
+    question_format="SHORT"
+)
+# Returns: Section with questions[3] and [4] having internal_choice=true
 ```
 
-## Additional Resources
+## Error Handling
 
-See references/ directory for:
-- CBSE standards and guidelines
-- Question format templates
-- Diagram pattern reference
+Returns error object with:
+- `status`: "failed"
+- `error`: Error message
+- `error_phase`: "retrieval" | "llm" | "diagram" | "assembly"
+- `generation_metadata.error`: true
+
+Error response uses streamlined schema with empty/default values.
+
+## Best Practices
+
+1. **Always reset counter** before new paper: `reset_question_counter()`
+2. **Use dict options format** for consistency
+3. **Check diagram detection** results in metadata
+4. **Verify internal_choice** flags in sections B, C, D, E
+5. **Validate section totals** match blueprint marks
+6. **Use sequential numbering** across all sections
+
+## Quality Checklist
+
+Before returning:
+- [ ] Options converted to dict format
+- [ ] Question number is sequential (Q1, Q2, Q3...)
+- [ ] ID format is correct
+- [ ] Diagram generated (if needed)
+- [ ] Explanation provided
+- [ ] CBSE internal choice rules applied (for sections)
+- [ ] Section totals calculated correctly
+- [ ] Streamlined schema (no hints/prerequisites/common_mistakes/quality_score)

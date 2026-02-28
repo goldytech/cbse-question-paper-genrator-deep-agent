@@ -1,6 +1,7 @@
 """Question Assembler Tool.
 
 This tool assembles CBSE-compliant questions from retrieved chunks and LLM-generated content.
+Supports both single question assembly and section compilation with CBSE format.
 """
 
 import logging
@@ -16,6 +17,9 @@ from cbse_question_retriever.data_types import (
 from diagram_generation.tool import generate_diagram_tool
 
 logger = logging.getLogger(__name__)
+
+# Global counter for sequential question numbering across sections
+_question_counter = 0
 
 # Keywords for diagram detection
 DIAGRAM_KEYWORDS = {
@@ -80,6 +84,19 @@ DIAGRAM_KEYWORDS = {
         "distribution",
     ],
 }
+
+
+def reset_question_counter():
+    """Reset counter for new paper generation."""
+    global _question_counter
+    _question_counter = 0
+
+
+def get_next_question_number() -> int:
+    """Get next sequential question number (Q1, Q2, Q3...)."""
+    global _question_counter
+    _question_counter += 1
+    return _question_counter
 
 
 def detect_diagram_need(
@@ -225,17 +242,126 @@ def build_diagram_elements(
     return elements if elements else None
 
 
+def convert_options_to_dict(options_raw) -> Dict[str, str]:
+    """Convert options from array format to dict format.
+
+    Converts ["A) text", "B) text", ...] to {"A": "text", "B": "text", ...}
+
+    Args:
+        options_raw: Raw options (list or dict)
+
+    Returns:
+        Dictionary format options
+    """
+    options = {}
+
+    if isinstance(options_raw, list):
+        for opt in options_raw:
+            if opt and len(opt) > 2 and opt[0] in "ABCD" and opt[1] == ")":
+                key = opt[0]  # "A", "B", "C", or "D"
+                value = opt[2:].strip()  # Remove "X) " prefix
+                options[key] = value
+    elif isinstance(options_raw, dict):
+        options = options_raw  # Already in correct format
+
+    return options
+
+
+def apply_cbse_internal_choice(questions: List[Dict], section_id: str) -> List[Dict]:
+    """Apply CBSE internal choice rules to questions.
+
+    CBSE Format:
+    - Sections B, C, D: Internal choice in last 2 questions
+    - Section E: Internal choice in ALL questions (case study)
+
+    Args:
+        questions: List of question dictionaries
+        section_id: Section identifier (A, B, C, D, E)
+
+    Returns:
+        Updated questions with internal_choice flags
+    """
+    total_questions = len(questions)
+
+    # Sections B, C, D: Choice in last 2 questions
+    if section_id in ["B", "C", "D"] and total_questions >= 2:
+        for i in range(total_questions - 2, total_questions):
+            questions[i]["internal_choice"] = True
+            questions[i]["choice_text"] = "OR"
+            questions[i]["choice_type"] = "alternative_question"
+
+    # Section E: Case Study - All questions have sub-parts
+    elif section_id == "E":
+        for q in questions:
+            q["has_sub_questions"] = True
+            q["sub_questions"] = [
+                {"part": "(i)", "marks": 1},
+                {"part": "(ii)", "marks": 1},
+                {"part": "(iii)", "marks": 2},
+            ]
+            q["internal_choice"] = True
+            q["choice_text"] = "Case Study based question"
+
+    return questions
+
+
+def compile_section(
+    questions: List[Dict],
+    section_id: str,
+    section_title: str,
+    marks_per_question: int,
+    question_format: str,
+) -> Dict[str, Any]:
+    """Compile questions into CBSE section format.
+
+    Organizes questions into a CBSE-compliant section with:
+    - Sequential numbering (Q1, Q2, Q3...)
+    - Section marks calculation
+    - Internal choice flags per CBSE rules
+    - Section metadata
+
+    Args:
+        questions: List of assembled questions
+        section_id: Section identifier (A, B, C, D, E)
+        section_title: Section title (e.g., "MCQs", "Short Answer")
+        marks_per_question: Marks for each question in section
+        question_format: Format of questions (MCQ, SHORT, LONG, CASE_STUDY)
+
+    Returns:
+        CBSE-formatted section dictionary
+    """
+    total_questions = len(questions)
+    section_total_marks = total_questions * marks_per_question
+
+    # Apply CBSE internal choice rules
+    questions = apply_cbse_internal_choice(questions, section_id)
+
+    return {
+        "section_id": section_id,
+        "title": section_title,
+        "question_format": question_format,
+        "marks_per_question": marks_per_question,
+        "questions_provided": total_questions,
+        "questions_attempt": total_questions,  # CBSE: all compulsory
+        "section_total_marks": section_total_marks,
+        "questions": questions,
+        "internal_choice_available": section_id in ["B", "C", "D", "E"],
+        "cbse_format": True,
+    }
+
+
 @tool
 def assemble_question_tool(
     retrieval_result: Dict[str, Any],
     llm_result: Dict[str, Any],
     question_number: int,
+    section_config: Optional[Dict] = None,
 ) -> Dict[str, Any]:
     """Assembles a CBSE-compliant question from retrieved chunks and LLM-generated content.
 
     This tool takes the results from chunk retrieval and LLM question generation,
     combines them into a complete CBSE question object, detects diagram needs,
-    and generates diagrams when required.
+    generates diagrams when required, and optionally compiles entire sections.
 
     Args:
         retrieval_result: Result from generate_question_tool containing:
@@ -251,27 +377,31 @@ def assemble_question_tool(
 
         llm_result: Result from generate_llm_question_tool containing:
             - question_text: Generated question text
-            - options: MCQ options (if MCQ)
+            - options: MCQ options (list ["A) text", ...] or dict {"A": "text", ...})
             - correct_answer: Correct answer
             - explanation: Solution explanation
             - diagram_needed: Boolean from LLM
             - diagram_description: Diagram description from LLM
-            - hints: Helpful hints
-            - prerequisites: Required knowledge
-            - common_mistakes: Typical errors
-            - quality_score: Self-assessed quality
 
         question_number: Question number within section (1-based)
 
+        section_config: Optional section compilation config:
+            - section_id: "A", "B", "C", "D", "E"
+            - title: Section title
+            - marks_per_question: Marks per question
+            - compile_section: bool - if True, return section format
+
     Returns:
-        Complete assembled question dictionary with:
+        Complete assembled question or compiled section with:
         - question_id: Formatted ID
         - question_text: Final question text
         - chapter, topic, format, marks, difficulty, etc.
-        - options, correct_answer (for MCQ)
+        - options: Dict format {"A": "text", "B": "text", ...}
+        - correct_answer (for MCQ)
         - has_diagram, diagram_type, diagram_svg_base64 (if diagram generated)
-        - explanation, hints, prerequisites, common_mistakes
-        - tags, quality_score, generation_metadata
+        - explanation
+        - internal_choice, has_sub_questions (CBSE format)
+        - generation_metadata
 
     Example:
         >>> retrieval = {
@@ -286,13 +416,15 @@ def assemble_question_tool(
         ... }
         >>> llm_output = {
         ...     "question_text": "Find the zero of p(x) = x - 3",
-        ...     "options": ["A) 3", "B) -3", "C) 0", "D) 1"],
+        ...     "options": ["A) 3", "B) -3", "C) 0", "D) 1"],  # Or dict format
         ...     "correct_answer": "A",
         ...     "diagram_needed": False
         ... }
         >>> result = assemble_question_tool(retrieval, llm_output, 1)
         >>> print(result["question_id"])
         "MATH-10-POL-MCQ-001"
+        >>> print(result["options"])
+        {"A": "3", "B": "-3", "C": "0", "D": "1"}
     """
     try:
         logger.info(f"Assembling question {question_number}")
@@ -311,7 +443,7 @@ def assemble_question_tool(
                 "topic": retrieval_result.get("topic", ""),
                 "question_format": retrieval_result.get("question_format", "MCQ"),
                 "marks": retrieval_result.get("marks", 1),
-                "options": None,
+                "options": {},
                 "correct_answer": None,
                 "difficulty": retrieval_result.get("difficulty", ""),
                 "bloom_level": retrieval_result.get("bloom_level", ""),
@@ -322,11 +454,10 @@ def assemble_question_tool(
                 "diagram_description": None,
                 "diagram_elements": None,
                 "explanation": None,
-                "hints": [],
-                "prerequisites": [],
-                "common_mistakes": [],
-                "tags": [],
-                "quality_score": None,
+                "internal_choice": False,
+                "choice_text": None,
+                "has_sub_questions": False,
+                "sub_questions": [],
                 "generation_metadata": {
                     "error": True,
                     "error_phase": "retrieval",
@@ -376,7 +507,7 @@ def assemble_question_tool(
                 "topic": topic,
                 "question_format": question_format,
                 "marks": marks,
-                "options": None,
+                "options": {},
                 "correct_answer": None,
                 "difficulty": difficulty,
                 "bloom_level": bloom_level,
@@ -387,11 +518,10 @@ def assemble_question_tool(
                 "diagram_description": None,
                 "diagram_elements": None,
                 "explanation": f"Error during generation: {llm_error}",
-                "hints": [],
-                "prerequisites": [],
-                "common_mistakes": [],
-                "tags": [],
-                "quality_score": None,
+                "internal_choice": False,
+                "choice_text": None,
+                "has_sub_questions": False,
+                "sub_questions": [],
                 "generation_metadata": {
                     "error": True,
                     "error_phase": llm_result.get("error_phase", "llm"),
@@ -406,13 +536,13 @@ def assemble_question_tool(
 
         # Extract LLM-generated content
         question_text = llm_result.get("question_text", "")
-        options = llm_result.get("options")
+
+        # Convert options to dict format (handles both array and dict input)
+        options_raw = llm_result.get("options")
+        options = convert_options_to_dict(options_raw)
+
         correct_answer = llm_result.get("correct_answer")
         explanation = llm_result.get("explanation")
-        hints = llm_result.get("hints", [])
-        prerequisites = llm_result.get("prerequisites", [])
-        common_mistakes = llm_result.get("common_mistakes", [])
-        quality_score = llm_result.get("quality_score")
 
         # Detect diagram need (use LLM result if available, otherwise detect)
         llm_diagram_needed = llm_result.get("diagram_needed", False)
@@ -445,10 +575,12 @@ def assemble_question_tool(
 
             # Call diagram generation tool
             try:
-                diagram_result = generate_diagram_tool.func(
-                    diagram_description=diagram_description,
-                    diagram_type=diagram_type,
-                    elements=diagram_elements,
+                diagram_result = generate_diagram_tool.invoke(
+                    {
+                        "diagram_description": diagram_description,
+                        "diagram_type": diagram_type,
+                        "elements": diagram_elements,
+                    }
                 )
 
                 if diagram_result.get("success"):
@@ -465,15 +597,6 @@ def assemble_question_tool(
                 logger.error(f"Error generating diagram: {e}")
                 has_diagram = False
 
-        # Build tags
-        tags = [
-            chapter.lower().replace(" ", "-"),
-            topic.lower().replace(" ", "-"),
-            nature.lower(),
-        ]
-        if has_diagram:
-            tags.append(diagram_type)
-
         # Combine generation metadata
         generation_metadata = {
             **llm_result.get("generation_metadata", {}),
@@ -482,7 +605,7 @@ def assemble_question_tool(
             "diagram_generated": has_diagram and diagram_svg_base64 is not None,
         }
 
-        # Build final assembled question
+        # Build final assembled question (STREAMLINED SCHEMA)
         assembled_question = {
             "question_id": question_id,
             "question_text": question_text,
@@ -492,27 +615,39 @@ def assemble_question_tool(
             "topic": topic,
             "question_format": question_format,
             "marks": marks,
-            "options": options,
+            "options": options,  # Dict format: {"A": "text", "B": "text", ...}
             "correct_answer": correct_answer,
             "difficulty": difficulty,
             "bloom_level": bloom_level.lower() if isinstance(bloom_level, str) else bloom_level,
             "nature": nature,
             "has_diagram": has_diagram,
+            "diagram_needed": has_diagram,  # Duplicate for compatibility
             "diagram_type": diagram_type if has_diagram else None,
             "diagram_svg_base64": diagram_svg_base64,
             "diagram_description": diagram_description if has_diagram else None,
             "diagram_elements": diagram_elements if has_diagram else None,
             "explanation": explanation,
-            "hints": hints,
-            "prerequisites": prerequisites,
-            "common_mistakes": common_mistakes,
-            "tags": tags,
-            "quality_score": quality_score,
+            "internal_choice": False,  # Will be set by compile_section()
+            "choice_text": None,
+            "has_sub_questions": False,
+            "sub_questions": [],
             "generation_metadata": generation_metadata,
             "status": "success",
             "error": None,
             "error_phase": None,
         }
+
+        # If section compilation requested, compile the section
+        if section_config and section_config.get("compile_section", False):
+            section = compile_section(
+                questions=[assembled_question],  # Single question in section for now
+                section_id=section_config.get("section_id", "A"),
+                section_title=section_config.get("title", "Section A"),
+                marks_per_question=marks,
+                question_format=question_format,
+            )
+            logger.info(f"Successfully compiled section {section['section_id']}")
+            return section
 
         logger.info(f"Successfully assembled question {question_id}")
         return assembled_question
@@ -522,11 +657,13 @@ def assemble_question_tool(
         return {
             "question_id": retrieval_result.get("question_id", f"ERR-{question_number}"),
             "question_text": f"[Error: Could not assemble question - {str(e)}]",
+            "section_id": retrieval_result.get("blueprint_reference", {}).get("section_id", ""),
+            "question_number": question_number,
             "chapter": retrieval_result.get("chapter", ""),
             "topic": retrieval_result.get("topic", ""),
             "question_format": retrieval_result.get("question_format", "MCQ"),
             "marks": retrieval_result.get("marks", 1),
-            "options": None,
+            "options": {},
             "correct_answer": None,
             "difficulty": retrieval_result.get("difficulty", "medium"),
             "bloom_level": retrieval_result.get("bloom_level", "understand"),
@@ -537,13 +674,62 @@ def assemble_question_tool(
             "diagram_description": None,
             "diagram_elements": None,
             "explanation": f"Assembly error: {str(e)}",
-            "hints": [],
-            "prerequisites": [],
-            "common_mistakes": [],
-            "tags": [],
-            "quality_score": None,
+            "internal_choice": False,
+            "choice_text": None,
+            "has_sub_questions": False,
+            "sub_questions": [],
             "generation_metadata": {"error": True, "error_message": str(e)},
             "status": "failed",
             "error": str(e),
             "error_phase": "assembly",
         }
+
+
+@tool
+def compile_section_tool(
+    questions: List[Dict[str, Any]],
+    section_id: str,
+    section_title: str,
+    marks_per_question: int,
+    question_format: str,
+) -> Dict[str, Any]:
+    """Compile multiple questions into a CBSE section format.
+
+    This tool organizes assembled questions into a CBSE-compliant section
+    with proper internal choice rules, sequential numbering, and section metadata.
+
+    Args:
+        questions: List of assembled question dictionaries
+        section_id: Section identifier (A, B, C, D, E)
+        section_title: Section title (e.g., "MCQs", "Short Answer Questions")
+        marks_per_question: Marks allocated to each question
+        question_format: Question format type (MCQ, SHORT, LONG, CASE_STUDY)
+
+    Returns:
+        CBSE-formatted section dictionary with:
+        - section_id, title, format, marks info
+        - questions: List with internal_choice flags applied
+        - section_total_marks: Calculated total
+        - internal_choice_available: Boolean
+
+    Example:
+        >>> questions = [assembled_q1, assembled_q2, ...]
+        >>> section = compile_section_tool(
+        ...     questions=questions,
+        ...     section_id="B",
+        ...     section_title="Short Answer Questions",
+        ...     marks_per_question=2,
+        ...     question_format="SHORT"
+        ... )
+        >>> print(section["section_total_marks"])
+        10
+        >>> print(section["questions"][-1]["internal_choice"])
+        True  # Last question has choice
+    """
+    return compile_section(
+        questions=questions,
+        section_id=section_id,
+        section_title=section_title,
+        marks_per_question=marks_per_question,
+        question_format=question_format,
+    )
