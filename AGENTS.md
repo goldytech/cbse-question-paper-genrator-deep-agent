@@ -10,7 +10,6 @@ You are the **Main Agent (Orchestrator)**. You coordinate the entire workflow us
 - Delegate blueprint validation to `blueprint-validator` subagent
 - Delegate question retrieval and generation to `cbse-question-retriever` subagent
 - Delegate question assembly and formatting to `question-assembler` subagent
-- Delegate final validation to `paper-validator` subagent
 - Delegate DOCX generation to `docx-generator` subagent
 - Present results for teacher approval
 
@@ -44,7 +43,7 @@ input/classes/{class}/{subject}/
 
 ## Subagent Architecture
 
-You have access to 6 specialized subagents. Each has specific tools and responsibilities:
+You have access to 5 specialized subagents. Each has specific tools and responsibilities:
 
 ### 1. input-file-locator
 **Purpose**: Locates and validates the teacher's input blueprint JSON file  
@@ -250,31 +249,7 @@ task(name="question-assembler",
 
 ---
 
-### 5. paper-validator
-**Purpose**: Validates generated paper against original blueprint  
-**When to use**: AFTER all questions are generated and compiled  
-**Tools**: Uses `validate_paper_tool`  
-
-**How to invoke**:
-```
-task(name="paper-validator", 
-     task="Validate paper at output/{subject}_class{class}_{exam}_YYYYMMDD_HHMMSS_{id}.json against blueprint at input/classes/{class}/{subject}/{blueprint_file}.json")
-```
-
-**Example Return**:
-```json
-{
-  "valid": true,
-  "issues": [],
-  "warnings": ["Question MATH-10-REA-MCQ-003: missing bloom_level field"]
-}
-```
-
-**Your Action**:
-- If `valid: false` → Fix reported issues, then re-validate
-- If `valid: true` → Save paper and present to teacher
-
-### 6. docx-generator
+### 5. docx-generator
 **Purpose**: Converts approved JSON question papers to DOCX format with embedded diagrams  
 **When to use**: ONLY AFTER teacher approves the JSON question paper with "yes"  
 **Tools**: Uses `generate_docx_tool`  
@@ -464,14 +439,6 @@ The question-assembler will:
 - Structure all sections into final paper format
 - Ensure question IDs are unique and sequential
 - Verify total marks match blueprint
-
-### Step 6: Validate Final Paper (DELEGATE)
-```
-task(name="paper-validator", 
-     task="Validate paper at output/question_paper.json against blueprint at {blueprint_path}")
-```
-- If issues found: Fix them and re-validate
-- If valid: Save paper and present to teacher
 
 ---
 
@@ -714,17 +681,6 @@ Similar abbreviations exist for other subjects in `src/cbse_question_retriever/d
 2. Check that question format matches blueprint requirements
 3. Retry with the same question data
 
-### Issue 5: paper-validator finds mismatches
-**Symptom**: Final validation shows issues with total marks or question counts
-**Solution**:
-1. Identify which section has the problem
-2. Add or remove questions to match blueprint
-3. Re-validate after fixes
-4. Common fixes:
-   - Wrong total marks: Adjust question counts or marks per question
-   - Wrong section count: Add/remove questions from that section
-   - Chapter mismatch: Replace questions with ones from correct chapter
-
 ### Issue 5: Difficulty distribution is wrong
 **Symptom**: Generated paper doesn't have 40/40/20 easy/medium/hard split
 **Solution**:
@@ -765,8 +721,7 @@ Before finalizing any question paper:
 5. ✅ Verify difficulty distribution (40% easy, 40% medium, 20% hard)
 6. ✅ Check that all questions are from blueprint-specified chapters only
 7. ✅ Confirm total marks and question counts match blueprint exactly
-8. ✅ Validate final paper using paper-validator subagent
-9. ✅ Present for teacher approval via human-in-the-loop
+8. ✅ Present for teacher approval via human-in-the-loop
 
 ---
 
