@@ -477,7 +477,7 @@ def create_agent():
     return create_deep_agent(
         model="openai:gpt-5-mini",
         backend=FilesystemBackend(root_dir=project_root, virtual_mode=True),
-        memory=["AGENTS.md"],
+        memory=["WORKFLOWAGENTS.md"],
         skills=["./src/skills/"],
         subagents=subagents,
         tools=tools,
