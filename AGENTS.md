@@ -106,7 +106,6 @@ tests/
 ## Pre-commit Checklist
 
 Before committing:
-- [ ] Run tests: `uv run pytest tests/ -v`
 - [ ] Run linting: `uv run ruff check .`
 - [ ] Run type check: `uv run mypy .`
 - [ ] Verify no trailing whitespace
